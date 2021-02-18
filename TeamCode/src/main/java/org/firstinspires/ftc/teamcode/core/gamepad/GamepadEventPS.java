@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.jetbrains.annotations.NotNull;
 
 public class GamepadEventPS extends Toggle.OneShot {
-    public Toggle.OneShot circle, square, x, triangle, dPadLeft, dPadRight, dPadUp, dPadDown, leftBumper, rightBumper, leftStickButton, rightStickButton;
+    Toggle.OneShot circle, square, x, triangle, dPadLeft, dPadRight, dPadUp, dPadDown, leftBumper, rightBumper, leftStickButton, rightStickButton;
 
     Gamepad gamepad;
 
@@ -24,7 +24,6 @@ public class GamepadEventPS extends Toggle.OneShot {
 
         this.gamepad = gamepad;
 
-
     }
 
     public boolean x() { return x.update(gamepad.x); }
@@ -39,7 +38,5 @@ public class GamepadEventPS extends Toggle.OneShot {
     public boolean rightBumper() {return rightBumper.update(gamepad.right_bumper);}
     public boolean leftStickButton() {return leftStickButton.update(gamepad.left_stick_button);}
     public boolean rightStickButton() {return rightStickButton.update(gamepad.right_stick_button);}
-
-
 
 }

@@ -17,16 +17,16 @@ public class ActuationConstants {
     static final double RESTING_TURNING_POS = 0;
 
     // Launcher Constants
-    static final double FLYWHEEL_RADIUS = toMeters(2);
-    static final double LAUNCHER_ANGLE = toRadians(20);
-    static final double LAUNCHER_HEIGHT = toMeters(14); // Measure where center of mass of disk would be before being launched.
+    public static final double FLYWHEEL_RADIUS = toMeters(2);
+    public static final double LAUNCHER_ANGLE = toRadians(32);
+    static final double LAUNCHER_HEIGHT = toMeters(9); // Measure where center of mass of disk would be before being launched.
 
-    static final double FEEDER_RESTING = 0;
-    static final double FEEDER_END = 1;
+    public static final double FEEDER_REST = 0.215;
+    public static final double FEEDER_YEET = 0.475;
 
     //TODO: Get a better measurement of power shot heights, considering the slant.
     static final double POWER_SHOT_FIRE_VERTICAL_DISPLACEMENT = toMeters(23.5) - LAUNCHER_HEIGHT;
-    static final double TOWER_GOAL_VERTICAL_DISPLACEMENT = toMeters(35.5) - LAUNCHER_HEIGHT;
+    public static final double TOWER_GOAL_VERTICAL_DISPLACEMENT = toMeters(35.5) - LAUNCHER_HEIGHT;
 
     public enum Target {
         POWER_SHOT_LEFT,

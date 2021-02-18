@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.core;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.localization.Localizer;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -17,12 +16,11 @@ import static java.lang.Math.cos;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.tan;
-import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_END;
-import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_RESTING;
+import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_YEET;
+import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_REST;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FLYWHEEL_RADIUS;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.LAUNCHER_ANGLE;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.POWER_SHOT_FIRE_VERTICAL_DISPLACEMENT;
-import static org.firstinspires.ftc.teamcode.core.ActuationConstants.RESTING_TURNING_POS;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.TOWER_GOAL_VERTICAL_DISPLACEMENT;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.Target;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.Target.POWER_SHOT_LEFT;
@@ -40,7 +38,7 @@ public class Actuation {
 
     DcMotorEx shoot;
     DcMotor intake;
-    Servo turn, wobbleGrab, wobbleArm, feeder;
+    Servo wobbleGrab, wobbleArm, feeder;
     HardwareMap hardwareMap;
     Localizer localizer;
     VoltageSensor voltage;
@@ -97,7 +95,7 @@ public class Actuation {
 
         if (hardwareMap.servo.contains("feeder")) {
             feeder = hardwareMap.servo.get("feeder");
-            feeder.setPosition(FEEDER_RESTING);
+            feeder.setPosition(FEEDER_REST);
         }
     }
 
@@ -105,8 +103,8 @@ public class Actuation {
     // All Shooter Operations
 
     public void feedRing() {
-        feeder.setPosition(FEEDER_END);
-        feeder.setPosition(FEEDER_RESTING);
+        feeder.setPosition(FEEDER_YEET);
+        feeder.setPosition(FEEDER_REST);
     }
 
     public boolean hasRings() {
@@ -166,15 +164,6 @@ public class Actuation {
     public void killFlywheel() {
         if (shoot != null)
             shoot.setPower(0);
-    }
-
-    /**
-     * From -150 (all the way left) to 150 (all the way right) degrees.
-     */
-    void turnShooter(double angle) {
-        final int TURN_OFFSET = 150;
-        double maxBearing = 300;
-        turn.setPosition(angle + TURN_OFFSET);
     }
 
     /**
