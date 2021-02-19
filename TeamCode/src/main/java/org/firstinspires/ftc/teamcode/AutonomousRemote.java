@@ -12,13 +12,12 @@ import org.firstinspires.ftc.teamcode.core.Actuation;
 import org.firstinspires.ftc.teamcode.core.StandardMechanumDrive;
 import org.firstinspires.ftc.teamcode.core.TensorFlowRingDetection;
 
-import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
 import static org.firstinspires.ftc.teamcode.core.FieldConstants.*;
 import static org.firstinspires.ftc.teamcode.core.FieldConstants.centerA;
 import static org.firstinspires.ftc.teamcode.core.FieldConstants.centerB;
 import static org.firstinspires.ftc.teamcode.core.FieldConstants.centerC;
-import static org.firstinspires.ftc.teamcode.core.FieldConstants.startPose;
+import static org.firstinspires.ftc.teamcode.core.FieldConstants.autonStartPose;
 
 @Autonomous(name = "Autonomous")
 public class AutonomousRemote extends LinearOpMode {
@@ -42,13 +41,13 @@ public class AutonomousRemote extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         drive = new StandardMechanumDrive(hardwareMap);
-        drive.setPoseEstimate(startPose);
+        drive.setPoseEstimate(autonStartPose);
         actuation = new Actuation(this, drive.getLocalizer());
         ringDetection = new TensorFlowRingDetection(this);
 
         waitForStart();
 
-        ringCase = ringDetection.res(this); //TODO: Hardcoding for now. Change when camera is mounted
+        ringCase = ringDetection.res(this);
         telemetry.addData("Ring case", ringCase);
         telemetry.update();
 
@@ -85,7 +84,7 @@ public class AutonomousRemote extends LinearOpMode {
             centerAgain = centerA;*/
         centerAgain = center;
 
-        centerAgain = new Pose2d(centerAgain.getX() - 3, centerAgain.getY(), centerAgain.getHeading());
+        centerAgain = new Pose2d(centerAgain.getX() - 20, centerAgain.getY(), centerAgain.getHeading());
 
         if(center.epsilonEquals(centerC))
             SHOOT_LINE = 8;
@@ -124,7 +123,7 @@ public class AutonomousRemote extends LinearOpMode {
     }
 
     private void performCase(String ringCase) {
-        Trajectory startToRings = drive.trajectoryBuilder(startPose).splineToConstantHeading(ringPos, 0).build();
+        Trajectory startToRings = drive.trajectoryBuilder(autonStartPose).splineToConstantHeading(ringPos, 0).build();
         switch (ringCase) {
             case "None": // Zero rings, case "A"
                 wobbleRoutine(centerA, backPoseA);
@@ -134,6 +133,7 @@ public class AutonomousRemote extends LinearOpMode {
                 actuation.suck();
                 drive.followTrajectory(startToRings);
                 actuation.stopIntake();
+                telemetry.addData("current pose", drive.getPoseEstimate().toString());
                 actuation.shoot(drive); //TODO: Account for loading rings into shooter for case B, C
                 wobbleRoutine(centerB, backPoseB);
                 break;

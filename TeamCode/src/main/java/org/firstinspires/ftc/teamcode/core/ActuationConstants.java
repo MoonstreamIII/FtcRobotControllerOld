@@ -8,21 +8,19 @@ public class ActuationConstants {
 
     // Wobble Grabber Constants
     //TODO: Measure Wobble Constants.
-    static final double WOBBLE_GRAB = 0.80;
+    static final double WOBBLE_GRAB = 0.69; //hAhA NiCe
     static final double WOBBLE_RELEASE = 0.0;
 
     static final double WOBBLE_ARM_UP = 0.0;
-    static final double WOBBLE_ARM_DOWN = 0.85;
-
-    static final double RESTING_TURNING_POS = 0;
+    static final double WOBBLE_ARM_DOWN = 1.0;
 
     // Launcher Constants
     public static final double FLYWHEEL_RADIUS = toMeters(2);
     public static final double LAUNCHER_ANGLE = toRadians(32);
     static final double LAUNCHER_HEIGHT = toMeters(9); // Measure where center of mass of disk would be before being launched.
 
-    public static final double FEEDER_REST = 0.215;
-    public static final double FEEDER_YEET = 0.475;
+    public static final double FEEDER_REST = 0.375;
+    public static final double FEEDER_YEET = 0.575;
 
     //TODO: Get a better measurement of power shot heights, considering the slant.
     static final double POWER_SHOT_FIRE_VERTICAL_DISPLACEMENT = toMeters(23.5) - LAUNCHER_HEIGHT;

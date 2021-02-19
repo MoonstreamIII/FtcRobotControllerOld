@@ -8,16 +8,16 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
 
+import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import static java.lang.Math.cos;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.tan;
-import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_YEET;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_REST;
+import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_YEET;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FLYWHEEL_RADIUS;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.LAUNCHER_ANGLE;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.POWER_SHOT_FIRE_VERTICAL_DISPLACEMENT;
@@ -31,8 +31,11 @@ import static org.firstinspires.ftc.teamcode.core.ActuationConstants.WOBBLE_ARM_
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.WOBBLE_ARM_UP;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.WOBBLE_GRAB;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.WOBBLE_RELEASE;
-import static org.firstinspires.ftc.teamcode.core.FieldConstants.*;
+import static org.firstinspires.ftc.teamcode.core.FieldConstants.SHOOT_LINE;
+import static org.firstinspires.ftc.teamcode.core.FieldConstants.centerPowerShot;
+import static org.firstinspires.ftc.teamcode.core.FieldConstants.leftPowerShot;
 import static org.firstinspires.ftc.teamcode.core.FieldConstants.redGoal;
+import static org.firstinspires.ftc.teamcode.core.FieldConstants.rightPowerShot;
 
 public class Actuation {
 
@@ -41,9 +44,9 @@ public class Actuation {
     Servo wobbleGrab, wobbleArm, feeder;
     HardwareMap hardwareMap;
     Localizer localizer;
-    VoltageSensor voltage;
-    LinearOpMode linearOpMode = null;
+    LinearOpMode linearOpMode;
     RevColorSensorV3 colorsensor;
+    boolean shot;
 
     /**
      * For Autonomous initialization specifically.
@@ -60,8 +63,6 @@ public class Actuation {
         this.hardwareMap = hardwareMap;
         this.localizer = localizer;
         this.linearOpMode = linearOpMode;
-
-        voltage = hardwareMap.voltageSensor.iterator().next();
 
         if (hardwareMap.dcMotor.contains("intake")) {
             intake = hardwareMap.dcMotor.get("intake");
@@ -97,14 +98,22 @@ public class Actuation {
             feeder = hardwareMap.servo.get("feeder");
             feeder.setPosition(FEEDER_REST);
         }
+        shot = false;
     }
 
 
     // All Shooter Operations
 
     public void feedRing() {
-        feeder.setPosition(FEEDER_YEET);
-        feeder.setPosition(FEEDER_REST);
+        if(shot) {
+            feeder.setPosition(FEEDER_REST);
+            shot = false;
+
+        }
+        else {
+            feeder.setPosition(FEEDER_YEET);
+            shot = true;
+        }
     }
 
     public boolean hasRings() {
@@ -120,8 +129,8 @@ public class Actuation {
     }
 
     /**
-     * Turns the shooter (or robot if necessary) to face the given target, and fires using
-     * calcInitialSpeed().
+     * Turns the shooter (or robot if necessary) to face the given target, and fires.
+     *
      *
      * @param target position to fire at
      * @param drive  driving instance to turn robot if necessary (>150 degrees)
@@ -129,7 +138,9 @@ public class Actuation {
     public void shoot(Target target, StandardMechanumDrive drive) {
         if (shoot == null) return;
         Pose2d pose = localizer.getPoseEstimate();
-        double bearing = target.pos().angleBetween(pose.vec()) + pose.getHeading(); // should be + or -?
+
+        //double bearing = target.pos().angleBetween(pose.vec()) - pose.getHeading(); // should be + or -?
+        double bearing = target.pos().minus(pose.vec()).angle();
 
         if (linearOpMode == null) { // If we are in TeleOp
             if (pose.getX() > SHOOT_LINE - 9) {
@@ -140,14 +151,17 @@ public class Actuation {
                 );
             }
         } else {
+            linearOpMode.sleep(200);
+            linearOpMode.telemetry.addData("Start angle", pose.getHeading());
+            linearOpMode.telemetry.addData("Bearing", bearing);
+            linearOpMode.telemetry.update();
             drive.turn(bearing);
         }
         feedRing();
-        shoot.setVelocity(calcInitialSpeed(target), AngleUnit.RADIANS);
+        shoot.setVelocity(target == TOWER_GOAL ? -4.0 : -3.9/*calcInitialSpeed(target)*/, AngleUnit.RADIANS);
         if (linearOpMode != null)
-            linearOpMode.sleep(2000); //TODO: Find appropriate delay, enough to let the motor shoot.
-        shoot.setPower(0);
-
+            linearOpMode.sleep(700); //TODO: Find appropriate delay, enough to let the motor shoot.
+        drive.update();
     }
 
     public void powerShots(StandardMechanumDrive drive) {
@@ -156,9 +170,9 @@ public class Actuation {
         shoot(POWER_SHOT_RIGHT, drive);
     }
 
-    public void preheatShooter() {
+    public void preheatShooter(Target target) {
         if (shoot != null)
-            shoot.setVelocity(calcInitialSpeed(TOWER_GOAL), AngleUnit.RADIANS);
+            shoot.setVelocity(target == TOWER_GOAL ? -4.0 : -3.9, AngleUnit.RADIANS);
     }
 
     public void killFlywheel() {
@@ -167,7 +181,7 @@ public class Actuation {
     }
 
     /**
-     * Using a kinematics approach to calculate the correct initial velocity to launch the ring so
+     * Using a kinematics based approach to calculate the correct initial velocity to launch the ring so
      * it can reach its goal, based on the vertical/horizontal distance from the target. See
      * https://www.desmos.com/calculator/qxdrswohm7 for more details, and the engineering notebook
      * for a complete derivation.
@@ -175,6 +189,7 @@ public class Actuation {
      * @param target One of 4 targets to shoot at (3 power shots, and the tower goal)
      * @return Adjusted speed to run the motor at (see adjust() for more details on the offset).
      */
+    @Deprecated
     double calcInitialSpeed(Target target) {
         double h = 0.0; // in meters
         final double g = 9.8; // In m/s^2
@@ -211,6 +226,7 @@ public class Actuation {
      * @param angVel Speed from calcInitialSpeed()
      * @return Adjusted speed, still in rad/s
      */
+    @Deprecated
     double adjust(double angVel) {
         return angVel + .75;
     }

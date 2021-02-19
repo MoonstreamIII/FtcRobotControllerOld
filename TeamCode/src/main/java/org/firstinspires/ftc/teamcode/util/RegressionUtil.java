@@ -43,10 +43,10 @@ public class RegressionUtil {
     }
 
     /**
-     * Numerically compute dy/dx from the given x and y values. The returned list is padded to match
+     * Numerically compute dy/dx from the given cross and y values. The returned list is padded to match
      * the length of the original sequences.
      *
-     * @param x x-values
+     * @param x cross-values
      * @param y y-values
      * @return derivative values
      */

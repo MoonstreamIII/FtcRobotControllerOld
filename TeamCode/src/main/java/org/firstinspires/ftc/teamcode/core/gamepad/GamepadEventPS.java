@@ -4,14 +4,14 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.jetbrains.annotations.NotNull;
 
 public class GamepadEventPS extends Toggle.OneShot {
-    Toggle.OneShot circle, square, x, triangle, dPadLeft, dPadRight, dPadUp, dPadDown, leftBumper, rightBumper, leftStickButton, rightStickButton;
+    Toggle.OneShot circle, square, cross, triangle, dPadLeft, dPadRight, dPadUp, dPadDown, leftBumper, rightBumper, leftStickButton, rightStickButton, share;
 
     Gamepad gamepad;
 
     public GamepadEventPS(@NotNull Gamepad gamepad) {
         circle = new Toggle.OneShot();
         square = new Toggle.OneShot();
-        x = new Toggle.OneShot();
+        cross = new Toggle.OneShot();
         triangle = new Toggle.OneShot();
         dPadRight = new Toggle.OneShot();
         dPadLeft = new Toggle.OneShot();
@@ -21,12 +21,13 @@ public class GamepadEventPS extends Toggle.OneShot {
         rightBumper = new Toggle.OneShot();
         leftStickButton = new Toggle.OneShot();
         rightStickButton = new Toggle.OneShot();
+        share = new Toggle.OneShot();
 
         this.gamepad = gamepad;
 
     }
 
-    public boolean x() { return x.update(gamepad.x); }
+    public boolean cross() { return cross.update(gamepad.cross); }
     public boolean circle() { return circle.update(gamepad.circle); }
     public boolean square() { return square.update(gamepad.square); }
     public boolean triangle() { return triangle.update(gamepad.triangle); }
@@ -38,5 +39,7 @@ public class GamepadEventPS extends Toggle.OneShot {
     public boolean rightBumper() {return rightBumper.update(gamepad.right_bumper);}
     public boolean leftStickButton() {return leftStickButton.update(gamepad.left_stick_button);}
     public boolean rightStickButton() {return rightStickButton.update(gamepad.right_stick_button);}
+    public boolean share() {return share.update(gamepad.share);}
+
 
 }

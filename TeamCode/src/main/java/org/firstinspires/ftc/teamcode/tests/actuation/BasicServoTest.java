@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.tests.actuation;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.CRServoImplEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.core.gamepad.GamepadEventPS;
@@ -11,7 +9,7 @@ import org.firstinspires.ftc.teamcode.core.gamepad.GamepadEventPS;
 @TeleOp
 public class BasicServoTest extends OpMode {
     Servo servo;
-//    Servo servo2;
+    Servo servo2;
 
 
     GamepadEventPS update;
@@ -28,8 +26,8 @@ public class BasicServoTest extends OpMode {
     @Override
     public void init() {
 
-        servo = hardwareMap.servo.get("feeder");
-//        servo2 = hardwareMap.servo.get("wobbleArm");
+        servo = hardwareMap.servo.get("wobbleGrab");
+        servo2 = hardwareMap.servo.get("wobbleArm");
 //        servo2.getController().pwmDisable();
 
         update = new GamepadEventPS(gamepad1);
@@ -43,7 +41,7 @@ public class BasicServoTest extends OpMode {
 
         if (update.circle())
             servo.setPosition(0);
-        if (update.x())
+        if (update.cross())
             servo.setPosition(1);
 
         if (update.dPadLeft())
@@ -57,11 +55,11 @@ public class BasicServoTest extends OpMode {
             position2 += increment;
 
         servo.setPosition(position);
-//        servo2.setPosition(position2);
+        servo2.setPosition(position2);
         telemetry.addData("Increment level", increment);
 //        telemetry.addData("Press a and b to move to either ends", "");
         telemetry.addData("Current position wobble grab", servo.getPosition());
-//        telemetry.addData("Current position wobble arm", servo2.getPosition());
+        telemetry.addData("Current position wobble arm", servo2.getPosition());
         telemetry.update();
     }
 }

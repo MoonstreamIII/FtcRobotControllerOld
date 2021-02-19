@@ -222,7 +222,7 @@ public class StandardMechanumDrive extends MecanumDrive {
 
         packet.put("mode", mode);
 
-        packet.put("x", currentPose.getX());
+        packet.put("cross", currentPose.getX());
         packet.put("y", currentPose.getY());
         packet.put("heading", currentPose.getHeading());
 
