@@ -139,24 +139,25 @@ public class Actuation {
         if (shoot == null) return;
         Pose2d pose = localizer.getPoseEstimate();
 
-        //double bearing = target.pos().angleBetween(pose.vec()) - pose.getHeading(); // should be + or -?
-        double bearing = target.pos().minus(pose.vec()).angle();
+        double destination = target.pos().minus(pose.vec()).angle();
+
 
         if (linearOpMode == null) { // If we are in TeleOp
             if (pose.getX() > SHOOT_LINE - 9) {
                 drive.followTrajectory(
                         drive.trajectoryBuilder(pose)
-                                .lineToLinearHeading(new Pose2d(SHOOT_LINE - 9, pose.getY(), bearing))
+                                .lineToLinearHeading(new Pose2d(SHOOT_LINE - 9, pose.getY(), destination))
                                 .build()
                 );
             }
         } else {
             linearOpMode.sleep(200);
             linearOpMode.telemetry.addData("Start angle", pose.getHeading());
-            linearOpMode.telemetry.addData("Bearing", bearing);
+            linearOpMode.telemetry.addData("Destination", destination);
             linearOpMode.telemetry.update();
-            drive.turn(bearing);
+            drive.turn(destination - pose.getHeading());
         }
+
         feedRing();
         shoot.setVelocity(target == TOWER_GOAL ? -4.0 : -3.9/*calcInitialSpeed(target)*/, AngleUnit.RADIANS);
         if (linearOpMode != null)

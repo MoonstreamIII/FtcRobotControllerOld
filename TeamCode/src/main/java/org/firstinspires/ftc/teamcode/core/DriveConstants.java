@@ -14,7 +14,7 @@ public class DriveConstants {
      * These are motor constants that should be listed online for your motors.
      */
     public static final double TICKS_PER_REV = 537.6;
-    public static final double MAX_RPM = 340;
+    public static final double MAX_RPM = 435;
 
     /*
      * These are physical constants that can be determined from your robot (including the track
@@ -26,7 +26,7 @@ public class DriveConstants {
      */
     public static double WHEEL_RADIUS = 1.9685; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 17.1; // in -- 14.0
+    public static double TRACK_WIDTH = 16.7; // in
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using
@@ -46,10 +46,10 @@ public class DriveConstants {
      * acceleration values are required, and the jerk values are optional (setting a jerk of 0.0
      * forces acceleration-limited profiling). All distance units are inches.
      */
-    public static double MAX_VEL = 30;
+    public static double MAX_VEL = 161.54;
     public static double MAX_ACCEL = 30;
-    public static double MAX_ANG_VEL = Math.toRadians(60);
-    public static double MAX_ANG_ACCEL = Math.toRadians(60);
+    public static double MAX_ANG_VEL = 7.047;
+    public static double MAX_ANG_ACCEL = 7.047;
 
 
     public static double encoderTicksToInches(double ticks) {

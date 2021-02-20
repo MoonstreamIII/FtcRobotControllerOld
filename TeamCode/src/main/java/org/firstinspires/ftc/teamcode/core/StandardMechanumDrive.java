@@ -180,6 +180,14 @@ public class StandardMechanumDrive extends MecanumDrive {
         waitForIdle();
     }
 
+    public void absoluteTurn(double angle) {
+        followTrajectory(
+                trajectoryBuilder(getPoseEstimate())
+                        .lineToLinearHeading(
+                                new Pose2d(getPoseEstimate().getX(), getPoseEstimate().getY(), angle))
+                        .build());
+    }
+
     public void followTrajectoryAsync(Trajectory trajectory) {
         follower.followTrajectory(trajectory);
         mode = Mode.FOLLOW_TRAJECTORY;
