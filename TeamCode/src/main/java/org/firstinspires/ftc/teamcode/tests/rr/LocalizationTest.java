@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.tests.rr;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -15,7 +14,6 @@ import org.firstinspires.ftc.teamcode.core.StandardMechanumDrive;
  * exercise is to ascertain whether the localizer has been configured properly (note: the pure
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
-@Config
 @TeleOp(group = "drive")
 public class LocalizationTest extends LinearOpMode {
     @Override

@@ -27,6 +27,9 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
     public static Pose2d rightDeadWheelPose = new Pose2d(-3.25, -LATERAL_DISTANCE / 2, 0);
     public static Pose2d horizontalDeadWheelPose = new Pose2d(2.0, LATERAL_DISTANCE / 2, Math.toRadians(90));
 
+    public static double VERTICAL_MULTIPLIER = 1;
+    public static double HORIZONTAL_MULTIPLIER = 1;
+
     public StandardTrackingWheelLocalizer(HardwareMap hardwareMap) {
         super(Arrays.asList(
                 leftDeadWheelPose,
@@ -51,9 +54,9 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
     @Override
     public List<Double> getWheelPositions() {
         return Arrays.asList(
-                encoderTicksToInches(leftEncoder.getCurrentPosition()),
-                encoderTicksToInches(rightEncoder.getCurrentPosition()),
-                encoderTicksToInches(frontEncoder.getCurrentPosition())
+                encoderTicksToInches(leftEncoder.getCurrentPosition()) * VERTICAL_MULTIPLIER,
+                encoderTicksToInches(rightEncoder.getCurrentPosition()) * VERTICAL_MULTIPLIER,
+                encoderTicksToInches(frontEncoder.getCurrentPosition()) * HORIZONTAL_MULTIPLIER
         );
     }
 
@@ -61,9 +64,9 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
     @Override
     public List<Double> getWheelVelocities() {
         return Arrays.asList(
-                encoderTicksToInches(leftEncoder.getRawVelocity()),
-                encoderTicksToInches(rightEncoder.getRawVelocity()),
-                encoderTicksToInches(frontEncoder.getCurrentPosition())
+                encoderTicksToInches(leftEncoder.getRawVelocity()) * VERTICAL_MULTIPLIER,
+                encoderTicksToInches(rightEncoder.getRawVelocity()) * VERTICAL_MULTIPLIER,
+                encoderTicksToInches(frontEncoder.getCurrentPosition()) * HORIZONTAL_MULTIPLIER
         );
     }
 }
