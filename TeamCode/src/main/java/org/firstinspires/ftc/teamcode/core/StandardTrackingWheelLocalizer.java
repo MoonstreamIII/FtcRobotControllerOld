@@ -18,14 +18,14 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
     public static double WHEEL_RADIUS = .984;
     public static double GEAR_RATIO = 1;
 
-    public static double LATERAL_DISTANCE = 15.2; // in; distance between the left and right wheels
+    public static double LATERAL_DISTANCE = 15.5; // in; distance between the left and right wheels
     public static double FORWARD_OFFSET = -6.5; // in; offset of the lateral wheel
 
     private Encoder leftEncoder, rightEncoder, frontEncoder;
 
     public static Pose2d leftDeadWheelPose = new Pose2d(-2.25, LATERAL_DISTANCE / 2, 0);
     public static Pose2d rightDeadWheelPose = new Pose2d(-3.25, -LATERAL_DISTANCE / 2, 0);
-    public static Pose2d horizontalDeadWheelPose = new Pose2d(2.0, LATERAL_DISTANCE / 2, Math.toRadians(90));
+    public static Pose2d horizontalDeadWheelPose = new Pose2d(2.0, 8.0, Math.toRadians(90));
 
     public static double VERTICAL_MULTIPLIER = 1.0026;
     public static double HORIZONTAL_MULTIPLIER = 0.9885;
@@ -37,11 +37,11 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
                 horizontalDeadWheelPose
         ));
 
-        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "frontLeft"));
-        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "frontRight"));
-        frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "backRight"));
+        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "left deadwheel"));
+        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "intake"));
+        frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "sideways deadwheel"));
 
-        leftEncoder.setDirection(Encoder.Direction.FORWARD);
+        leftEncoder.setDirection(Encoder.Direction.REVERSE);
         rightEncoder.setDirection(Encoder.Direction.FORWARD);
         frontEncoder.setDirection(Encoder.Direction.FORWARD);
     }

@@ -6,30 +6,30 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp
 public class DeadWheelTest extends OpMode {
-    DcMotor frontRight;
-    DcMotor frontLeft;
-    DcMotor backRight;
+    DcMotor rightDeadwheel;
+    DcMotor leftDeadwheel;
+    DcMotor sidewaysDeadwheel;
 
     @Override
     public void init() {
-        frontLeft = hardwareMap.dcMotor.get("frontLeft");
-        frontRight = hardwareMap.dcMotor.get("frontRight");
-        backRight = hardwareMap.dcMotor.get("backRight");
+        leftDeadwheel = hardwareMap.dcMotor.get("left deadwheel");
+        rightDeadwheel = hardwareMap.dcMotor.get("intake");
+        sidewaysDeadwheel = hardwareMap.dcMotor.get("sideways deadwheel");
 
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightDeadwheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftDeadwheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        sidewaysDeadwheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDeadwheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftDeadwheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        sidewaysDeadwheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     @Override
     public void loop() {
-        telemetry.addData("frontLeft (left)", frontLeft.getCurrentPosition());
-        telemetry.addData("frontRight (right)", frontRight.getCurrentPosition());
-        telemetry.addData("backRight (sideways)", backRight.getCurrentPosition());
+        telemetry.addData("left (left)", leftDeadwheel.getCurrentPosition());
+        telemetry.addData("right (right)", rightDeadwheel.getCurrentPosition());
+        telemetry.addData("sideways (sideways)", sidewaysDeadwheel.getCurrentPosition());
         telemetry.update();
     }
 }
