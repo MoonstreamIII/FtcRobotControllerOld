@@ -26,7 +26,7 @@ import static org.firstinspires.ftc.teamcode.core.DriveConstants.getMotorVelocit
 @Config
 @Autonomous(group = "drive")
 public class MaxVelocityTuner extends LinearOpMode {
-    public static double RUNTIME = 2.0;
+    public static double RUNTIME = 0.8;
 
     private ElapsedTime timer;
     private double maxVelocity = 0.0;

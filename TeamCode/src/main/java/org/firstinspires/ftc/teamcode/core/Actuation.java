@@ -74,6 +74,7 @@ public class Actuation {
             shoot = hardwareMap.get(DcMotorEx.class, "shooter");
             shoot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             shoot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            shoot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             shoot.setVelocityPIDFCoefficients(1, 1, 0, 1);
         }
 

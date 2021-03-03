@@ -25,6 +25,7 @@ import static org.firstinspires.ftc.teamcode.core.FieldConstants.autonStartPose;
 
  */
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
+
 public class TeleOp extends OpMode {
     StandardMechanumDrive drive;
     Actuation actuation;
@@ -166,11 +167,11 @@ public class TeleOp extends OpMode {
         return new Pose2d(x, y, heading);
     }
 
-    static double powerScale(double power){
+    public static double powerScale(double power){
         return powerScale(power, 1);
     }
 
-    static double powerScale(double power, double scale){
+    public static double powerScale(double power, double scale){
         if (power<=1) {
             if (power < 0)
                 return -(scale * power * power);
