@@ -12,6 +12,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODERS;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
+import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 import static java.lang.Math.cos;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
@@ -31,6 +35,7 @@ import static org.firstinspires.ftc.teamcode.core.ActuationConstants.WOBBLE_ARM_
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.WOBBLE_ARM_UP;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.WOBBLE_GRAB;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.WOBBLE_RELEASE;
+import static org.firstinspires.ftc.teamcode.core.ActuationConstants.shooterPIDF;
 import static org.firstinspires.ftc.teamcode.core.FieldConstants.SHOOT_LINE;
 import static org.firstinspires.ftc.teamcode.core.FieldConstants.centerPowerShot;
 import static org.firstinspires.ftc.teamcode.core.FieldConstants.leftPowerShot;
@@ -66,16 +71,16 @@ public class Actuation {
 
         if (hardwareMap.dcMotor.contains("intake")) {
             intake = hardwareMap.dcMotor.get("intake");
-            intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            intake.setMode(STOP_AND_RESET_ENCODER);
+            intake.setMode(RUN_USING_ENCODER);
         }
 
         if (hardwareMap.dcMotor.contains("shooter")) {
             shoot = hardwareMap.get(DcMotorEx.class, "shooter");
-            shoot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            shoot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            shoot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            shoot.setVelocityPIDFCoefficients(1, 1, 0, 1);
+            shoot.setMode(STOP_AND_RESET_ENCODER);
+            shoot.setMode(RUN_USING_ENCODER);
+            shoot.setZeroPowerBehavior(BRAKE);
+            shoot.setPIDFCoefficients(RUN_USING_ENCODER, shooterPIDF);
         }
 
         if (hardwareMap.servo.contains("wobbleGrab")) {
@@ -106,12 +111,11 @@ public class Actuation {
     // All Shooter Operations
 
     public void feedRing() {
-        if(shot) {
+        if (shot) {
             feeder.setPosition(FEEDER_REST);
             shot = false;
 
-        }
-        else {
+        } else {
             feeder.setPosition(FEEDER_YEET);
             shot = true;
         }
@@ -132,13 +136,12 @@ public class Actuation {
     /**
      * Turns the shooter (or robot if necessary) to face the given target, and fires.
      *
-     *
      * @param target position to fire at
      * @param drive  driving instance to turn robot if necessary (>150 degrees)
      */
     public void shoot(Target target, StandardMechanumDrive drive) {
-        if (shoot == null) return;
-        Pose2d pose = localizer.getPoseEstimate();
+        if (shoot == null || feeder == null) return;
+        Pose2d pose = drive.getPoseEstimate();
 
         double destination = target.pos().minus(pose.vec()).angle();
 
@@ -152,24 +155,29 @@ public class Actuation {
                 );
             }
         } else {
-            linearOpMode.sleep(200);
             linearOpMode.telemetry.addData("Start angle", pose.getHeading());
             linearOpMode.telemetry.addData("Destination", destination);
             linearOpMode.telemetry.update();
-            drive.turn(destination - pose.getHeading());
+            drive.turn(destination - ((pose.getHeading() > Math.PI / 2) ? pose.getHeading() - 2 * Math.PI : pose.getHeading()));
+
+            feeder.setPosition(FEEDER_YEET);
+            linearOpMode.sleep(100);
+            feeder.setPosition(FEEDER_REST);
         }
 
-        feedRing();
-        shoot.setVelocity(target == TOWER_GOAL ? -4.0 : -3.9/*calcInitialSpeed(target)*/, AngleUnit.RADIANS);
+        /*feedRing();
+        shoot.setVelocity(target == TOWER_GOAL ? -4.0 : -3.9*//*calcInitialSpeed(target)*//*, AngleUnit.RADIANS);
         if (linearOpMode != null)
-            linearOpMode.sleep(700); //TODO: Find appropriate delay, enough to let the motor shoot.
+            linearOpMode.sleep(700); *///TODO: Find appropriate delay, enough to let the motor shoot.
         drive.update();
     }
 
     public void powerShots(StandardMechanumDrive drive) {
-        shoot(POWER_SHOT_LEFT, drive);
-        shoot(POWER_SHOT_MIDDLE, drive);
         shoot(POWER_SHOT_RIGHT, drive);
+        if(linearOpMode != null) linearOpMode.sleep(550);
+        shoot(POWER_SHOT_MIDDLE, drive);
+        if(linearOpMode != null) linearOpMode.sleep(550);
+        shoot(POWER_SHOT_LEFT, drive);
     }
 
     public void preheatShooter(Target target) {
@@ -178,8 +186,7 @@ public class Actuation {
     }
 
     public void killFlywheel() {
-        if (shoot != null)
-            shoot.setPower(0);
+        if (shoot != null) shoot.setPower(0);
     }
 
     /**
@@ -275,7 +282,7 @@ public class Actuation {
     }
 
     public void wobbleArmSlightltyUp() {
-        if(wobbleArm != null)
+        if (wobbleArm != null)
             wobbleArm.setPosition(.6);
     }
 

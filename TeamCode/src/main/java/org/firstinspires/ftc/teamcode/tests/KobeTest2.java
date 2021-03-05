@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.tests;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -21,9 +23,11 @@ import static java.lang.Math.tan;
 import static org.firstinspires.ftc.teamcode.TeleOp.powerScale;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_REST;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_YEET;
-import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FLYWHEEL_RADIUS;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.LAUNCHER_ANGLE;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.TOWER_GOAL_VERTICAL_DISPLACEMENT;
+import static org.firstinspires.ftc.teamcode.core.ActuationConstants.shooterPIDF;
+import static org.firstinspires.ftc.teamcode.core.FieldConstants.autonStartPose;
+import static org.firstinspires.ftc.teamcode.core.FieldConstants.leftPowerShot;
 
 @Config
 @TeleOp(name = "Kobe Test Part 2")
@@ -31,7 +35,8 @@ public class KobeTest2 extends OpMode {
     DcMotorEx shooter;
     Servo feeder;
     final double wheelRadius = 0.0508; // in meters
-    double angularVelocity = 0; // rad/s
+    public static double angularVelocity = 0; // rad/s
+    public static double shootDelayMillis = 500;
     double linearVelocity = 0; // m/s
 
     final double MAX_RPM = 6000.0; // in RPM, if you couldn't figure it out
@@ -41,9 +46,10 @@ public class KobeTest2 extends OpMode {
     double distance = 73;
 
     StandardMechanumDrive drive;
-    public static PIDFCoefficients shooterPIDF = new PIDFCoefficients(15,3,19,12);
-
     GamepadEventPS update;
+    FtcDashboard dashboardTelemetry;
+
+
     @Override
     public void init() {
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
@@ -52,23 +58,21 @@ public class KobeTest2 extends OpMode {
         update = new GamepadEventPS(gamepad1);
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setVelocityPIDFCoefficients(.2,1,0,5);
+
         drive = new StandardMechanumDrive(this.hardwareMap);
+        drive.setPoseEstimate(autonStartPose);
         shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shooterPIDF);
+        dashboardTelemetry = FtcDashboard.getInstance();
+        telemetry = dashboardTelemetry.getTelemetry();
     }
 
     @Override
     public void loop() {
 
         if(update.dPadUp())
-            angularVelocity += .1;
+            angularVelocity += .05;
         if(update.dPadDown())
-            angularVelocity -= .1;
-
-        if(update.dPadLeft())
-            distance -= 2;
-        if(update.dPadRight())
-            distance += 2;
+            angularVelocity -= .05;
 
         if(gamepad1.left_bumper)
             feeder.setPosition(FEEDER_YEET);
@@ -85,16 +89,38 @@ public class KobeTest2 extends OpMode {
 
         linearVelocity = shooter.getVelocity(AngleUnit.RADIANS) * wheelRadius;
 
+        // Shoot twice
+        if(update.circle()) {
+            double destination = leftPowerShot.minus(drive.getPoseEstimate().vec()).angle();
+            telemetry.addData("destination", destination);
+            drive.turn(destination - drive.getPoseEstimate().getHeading());
+            feeder.setPosition(FEEDER_YEET);
+            try {
+                for(int i = 0; i < 3; i++) {
+                    Thread.sleep(100);
+                    feeder.setPosition(FEEDER_REST);
+                    Thread.sleep((long)Math.max(shootDelayMillis - 100, 0));
+                    feeder.setPosition(FEEDER_YEET);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        drive.update();
+
+        shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shooterPIDF);
 
         shooter.setVelocity(angularVelocity, AngleUnit.RADIANS);
         telemetry.addLine("Use dPad Up/Down to change motor speed");
-        telemetry.addData("Angular velocity (rad)", angularVelocity);
-//        telemetry.addData("Angular Velocity (deg)", toDegrees(angularVelocity));
+        telemetry.addData("Set velocity (rad/s)", angularVelocity);
 //        telemetry.addData("Linear Velocity", linearVelocity);
-        telemetry.addData("Motor Power", shooter.getPower());
         telemetry.addData("Actual velocity (rad/s)", shooter.getVelocity(AngleUnit.RADIANS));
-//        telemetry.addData("Distance from goal", distance);
-//        telemetry.addData("calculated speed (set it to this)", calcInitialSpeed());
+
+        Pose2d poseEstimate = drive.getPoseEstimate();
+        telemetry.addData("x", poseEstimate.getX());
+        telemetry.addData("y", poseEstimate.getY());
+        telemetry.addData("heading", Math.toDegrees(poseEstimate.getHeading()));
         telemetry.update();
     }
     double calcInitialSpeed() {

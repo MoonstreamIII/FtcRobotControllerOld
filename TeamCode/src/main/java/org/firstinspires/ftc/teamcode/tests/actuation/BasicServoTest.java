@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.core.gamepad.GamepadEventPS;
 public class BasicServoTest extends OpMode {
     Servo servo;
     Servo servo2;
+    Servo servo3;
 
 
     GamepadEventPS update;
@@ -28,6 +29,8 @@ public class BasicServoTest extends OpMode {
 
         servo = hardwareMap.servo.get("wobbleGrab");
         servo2 = hardwareMap.servo.get("wobbleArm");
+//        servo3 = hardwareMap.servo.get("feeder");
+
 //        servo2.getController().pwmDisable();
 
         update = new GamepadEventPS(gamepad1);
@@ -43,6 +46,8 @@ public class BasicServoTest extends OpMode {
             servo.setPosition(0);
         if (update.cross())
             servo.setPosition(1);
+
+
 
         if (update.dPadLeft())
             position -= increment;

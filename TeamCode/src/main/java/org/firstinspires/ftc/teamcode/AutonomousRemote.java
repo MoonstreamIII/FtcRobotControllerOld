@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.core.Actuation;
+import org.firstinspires.ftc.teamcode.core.ActuationConstants;
 import org.firstinspires.ftc.teamcode.core.StandardMechanumDrive;
 import org.firstinspires.ftc.teamcode.core.TensorFlowRingDetection;
 
@@ -52,6 +53,7 @@ public class AutonomousRemote extends LinearOpMode {
         telemetry.update();
 
         if (isStopRequested()) return;
+        actuation.preheatShooter(ActuationConstants.Target.POWER_SHOT_LEFT);
         drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).forward(6).build());
         actuation.powerShots(drive);
         performCase(ringCase);

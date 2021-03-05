@@ -1,9 +1,13 @@
 package org.firstinspires.ftc.teamcode.core;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
 import static java.lang.Math.*;
 import static org.firstinspires.ftc.teamcode.core.FieldConstants.*;
 
+@Config
 public class ActuationConstants {
 
     // Wobble Grabber Constants
@@ -19,8 +23,11 @@ public class ActuationConstants {
     public static final double LAUNCHER_ANGLE = toRadians(32);
     static final double LAUNCHER_HEIGHT = toMeters(9); // Measure where center of mass of disk would be before being launched.
 
-    public static final double FEEDER_REST = 0.375;
-    public static final double FEEDER_YEET = 0.575;
+    public static PIDFCoefficients shooterPIDF = new PIDFCoefficients(30,25,0,0);
+
+
+    public static double FEEDER_REST = 0.375;
+    public static double FEEDER_YEET = 0.575;
 
     //TODO: Get a better measurement of power shot heights, considering the slant.
     static final double POWER_SHOT_FIRE_VERTICAL_DISPLACEMENT = toMeters(23.5) - LAUNCHER_HEIGHT;
