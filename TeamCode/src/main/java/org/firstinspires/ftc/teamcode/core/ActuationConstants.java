@@ -39,7 +39,7 @@ public class ActuationConstants {
         POWER_SHOT_RIGHT,
         TOWER_GOAL;
 
-        Vector2d pos() {
+        public Vector2d pos() {
             switch (this) {
                 case POWER_SHOT_LEFT:
                     return leftPowerShot;

@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.core.ActuationConstants;
 import org.firstinspires.ftc.teamcode.core.StandardMechanumDrive;
 import org.firstinspires.ftc.teamcode.core.gamepad.GamepadEventPS;
 
@@ -25,6 +26,9 @@ import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_REST
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_YEET;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.LAUNCHER_ANGLE;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.TOWER_GOAL_VERTICAL_DISPLACEMENT;
+import static org.firstinspires.ftc.teamcode.core.ActuationConstants.Target.POWER_SHOT_LEFT;
+import static org.firstinspires.ftc.teamcode.core.ActuationConstants.Target.POWER_SHOT_MIDDLE;
+import static org.firstinspires.ftc.teamcode.core.ActuationConstants.Target.POWER_SHOT_RIGHT;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.shooterPIDF;
 import static org.firstinspires.ftc.teamcode.core.FieldConstants.autonStartPose;
 import static org.firstinspires.ftc.teamcode.core.FieldConstants.leftPowerShot;
@@ -37,6 +41,13 @@ public class KobeTest2 extends OpMode {
     final double wheelRadius = 0.0508; // in meters
     public static double angularVelocity = 0; // rad/s
     public static double shootDelayMillis = 500;
+    double[] turnOffsets = {0,0,0};
+    public static double turnOffsetLeft = 0.18;
+    public static double turnOffsetMiddle = .18;
+    public static double turnOffsetRight = 0.18;
+
+
+
     double linearVelocity = 0; // m/s
 
     final double MAX_RPM = 6000.0; // in RPM, if you couldn't figure it out
@@ -89,39 +100,44 @@ public class KobeTest2 extends OpMode {
 
         linearVelocity = shooter.getVelocity(AngleUnit.RADIANS) * wheelRadius;
 
+        turnOffsets = new double[]{turnOffsetRight, turnOffsetMiddle, turnOffsetLeft};
         // Shoot twice
         if(update.circle()) {
-            double destination = leftPowerShot.minus(drive.getPoseEstimate().vec()).angle();
-            telemetry.addData("destination", destination);
-            drive.turn(destination - drive.getPoseEstimate().getHeading());
-            feeder.setPosition(FEEDER_YEET);
-            try {
-                for(int i = 0; i < 3; i++) {
-                    Thread.sleep(100);
+            ActuationConstants.Target[] targets = {POWER_SHOT_RIGHT, POWER_SHOT_MIDDLE, POWER_SHOT_LEFT};
+            for (int i = 0; i < 3; i++) {
+                double destination = targets[i].pos().minus(drive.getPoseEstimate().vec()).angle();
+                telemetry.addData("destination", destination);
+                Pose2d pose = drive.getPoseEstimate();
+                drive.turn(destination - ((pose.getHeading() > PI) ? pose.getHeading() - (2 * PI) : pose.getHeading()) - turnOffsets[i]);
+                feeder.setPosition(FEEDER_YEET);
+                try {
+
+                    Thread.sleep(200);
                     feeder.setPosition(FEEDER_REST);
-                    Thread.sleep((long)Math.max(shootDelayMillis - 100, 0));
+                    Thread.sleep((long) Math.max(shootDelayMillis - 100, 0));
                     feeder.setPosition(FEEDER_YEET);
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
+
         }
 
-        drive.update();
 
         shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, shooterPIDF);
 
         shooter.setVelocity(angularVelocity, AngleUnit.RADIANS);
         telemetry.addLine("Use dPad Up/Down to change motor speed");
         telemetry.addData("Set velocity (rad/s)", angularVelocity);
-//        telemetry.addData("Linear Velocity", linearVelocity);
         telemetry.addData("Actual velocity (rad/s)", shooter.getVelocity(AngleUnit.RADIANS));
 
-        Pose2d poseEstimate = drive.getPoseEstimate();
-        telemetry.addData("x", poseEstimate.getX());
+
+        /*telemetry.addData("x", poseEstimate.getX());
         telemetry.addData("y", poseEstimate.getY());
-        telemetry.addData("heading", Math.toDegrees(poseEstimate.getHeading()));
+        telemetry.addData("heading", Math.toDegrees(poseEstimate.getHeading()));*/
         telemetry.update();
+        drive.update();
     }
     double calcInitialSpeed() {
         double h = TOWER_GOAL_VERTICAL_DISPLACEMENT; // in meters

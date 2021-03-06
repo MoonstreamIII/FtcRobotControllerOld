@@ -16,6 +16,7 @@ import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODERS;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
+import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
@@ -158,10 +159,10 @@ public class Actuation {
             linearOpMode.telemetry.addData("Start angle", pose.getHeading());
             linearOpMode.telemetry.addData("Destination", destination);
             linearOpMode.telemetry.update();
-            drive.turn(destination - ((pose.getHeading() > Math.PI / 2) ? pose.getHeading() - 2 * Math.PI : pose.getHeading()));
+            drive.turn(destination - ((pose.getHeading() > PI) ? pose.getHeading() - (2 * PI) : pose.getHeading()) - .18);
 
             feeder.setPosition(FEEDER_YEET);
-            linearOpMode.sleep(100);
+            linearOpMode.sleep(500);
             feeder.setPosition(FEEDER_REST);
         }
 
@@ -174,10 +175,14 @@ public class Actuation {
 
     public void powerShots(StandardMechanumDrive drive) {
         shoot(POWER_SHOT_RIGHT, drive);
-        if(linearOpMode != null) linearOpMode.sleep(550);
+        if(linearOpMode != null) linearOpMode.sleep(750);
         shoot(POWER_SHOT_MIDDLE, drive);
-        if(linearOpMode != null) linearOpMode.sleep(550);
+        if(linearOpMode != null) linearOpMode.sleep(750);
         shoot(POWER_SHOT_LEFT, drive);
+    }
+
+    public void preheatShooter(double velocity) {
+        if (shoot != null) shoot.setVelocity(velocity, AngleUnit.RADIANS);
     }
 
     public void preheatShooter(Target target) {
