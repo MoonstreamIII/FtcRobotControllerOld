@@ -131,7 +131,7 @@ public class AutonomousRemote extends LinearOpMode {
         Trajectory startToRings = drive.trajectoryBuilder(autonStartPose).splineToConstantHeading(ringPos, 0).build();
         switch (ringCase) {
             case "None": // Zero rings, case "A"
-                actuation.preheatShooter(-3.9);
+                actuation.preheatShooter(-3.8);
                 sleep(1000);
                 drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).forward(60).build());
                 actuation.powerShots(drive);

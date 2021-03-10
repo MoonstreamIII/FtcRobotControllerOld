@@ -14,6 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODERS;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODER;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 import static java.lang.Math.PI;
@@ -73,7 +74,7 @@ public class Actuation {
         if (hardwareMap.dcMotor.contains("intake")) {
             intake = hardwareMap.dcMotor.get("intake");
             intake.setMode(STOP_AND_RESET_ENCODER);
-            intake.setMode(RUN_USING_ENCODER);
+            intake.setMode(RUN_WITHOUT_ENCODER);
         }
 
         if (hardwareMap.dcMotor.contains("shooter")) {
@@ -141,6 +142,10 @@ public class Actuation {
      * @param drive  driving instance to turn robot if necessary (>150 degrees)
      */
     public void shoot(Target target, StandardMechanumDrive drive) {
+        shoot(target, drive, .18);
+    }
+
+    public void shoot(Target target, StandardMechanumDrive drive, double offset) {
         if (shoot == null || feeder == null) return;
         Pose2d pose = drive.getPoseEstimate();
 
@@ -159,7 +164,7 @@ public class Actuation {
             linearOpMode.telemetry.addData("Start angle", pose.getHeading());
             linearOpMode.telemetry.addData("Destination", destination);
             linearOpMode.telemetry.update();
-            drive.turn(destination - ((pose.getHeading() > PI) ? pose.getHeading() - (2 * PI) : pose.getHeading()) - .18);
+            drive.turn(destination - ((pose.getHeading() > PI) ? pose.getHeading() - (2 * PI) : pose.getHeading()) - offset);
 
             feeder.setPosition(FEEDER_YEET);
             linearOpMode.sleep(500);
@@ -174,11 +179,11 @@ public class Actuation {
     }
 
     public void powerShots(StandardMechanumDrive drive) {
-        shoot(POWER_SHOT_RIGHT, drive);
+        shoot(POWER_SHOT_RIGHT, drive, .18);
         if(linearOpMode != null) linearOpMode.sleep(750);
-        shoot(POWER_SHOT_MIDDLE, drive);
+        shoot(POWER_SHOT_MIDDLE, drive, .12);
         if(linearOpMode != null) linearOpMode.sleep(750);
-        shoot(POWER_SHOT_LEFT, drive);
+        shoot(POWER_SHOT_LEFT, drive, .06);
     }
 
     public void preheatShooter(double velocity) {

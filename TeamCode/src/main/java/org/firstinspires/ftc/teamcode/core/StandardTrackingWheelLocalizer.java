@@ -37,9 +37,9 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
                 horizontalDeadWheelPose
         ));
 
-        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "left deadwheel"));
-        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "intake"));
-        frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "sideways deadwheel"));
+        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "left_deadwheel"));
+        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "backLeft"));
+        frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "sideways_deadwheel"));
 
         leftEncoder.setDirection(Encoder.Direction.REVERSE);
         rightEncoder.setDirection(Encoder.Direction.FORWARD);
