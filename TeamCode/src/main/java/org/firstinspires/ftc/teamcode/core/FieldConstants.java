@@ -18,13 +18,13 @@ public class FieldConstants {
     public static Vector2d rightPowerShot = new Vector2d(MAX_EDGE, -13.5);
 
     // For path coordinates
-    public static Vector2d ringPos = new Vector2d(-20, -36);
-    public static Pose2d centerA = new Pose2d(10,-45.5, toRadians(90)); // Theoretical: x = 12, y = -48
+    public static Vector2d ringPos = new Vector2d(-20, -30);
+    public static Pose2d centerA = new Pose2d(14,-45.5, toRadians(90)); // Theoretical: x = 12, y = -48
     public static Pose2d centerB = new Pose2d(36,-24, toRadians(90)); // Theoretical: x = 36, y = -24
-    public static Pose2d centerC = new Pose2d(60, -48, toRadians(90)); // Theoretical: x = 60, y = -48
+    public static Pose2d centerC = new Pose2d(68, -48, toRadians(90)); // Theoretical: x = 60, y = -48
 
     // Theoretical: x = -31, y = -48
-    public static Pose2d backPoseA = new Pose2d(-36.5,-31.5, toRadians(0)); // -49.25, -28
+    public static Pose2d backPoseA = new Pose2d(-40,-32, toRadians(0)); // -49.25, -28
     public static Pose2d backPoseB = new Pose2d(-31, -48, toRadians(0)); // -47.5, -44
     public static Pose2d backPoseC = new Pose2d(-31,-48, toRadians(0)); // -52, -26
 

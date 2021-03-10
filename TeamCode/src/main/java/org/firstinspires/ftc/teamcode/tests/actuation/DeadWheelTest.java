@@ -12,9 +12,9 @@ public class DeadWheelTest extends OpMode {
 
     @Override
     public void init() {
-        leftDeadwheel = hardwareMap.dcMotor.get("left deadwheel");
-        rightDeadwheel = hardwareMap.dcMotor.get("intake");
-        sidewaysDeadwheel = hardwareMap.dcMotor.get("sideways deadwheel");
+        leftDeadwheel = hardwareMap.dcMotor.get("left_deadwheel");
+        rightDeadwheel = hardwareMap.dcMotor.get("backLeft");
+        sidewaysDeadwheel = hardwareMap.dcMotor.get("sideways_deadwheel");
 
         rightDeadwheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftDeadwheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

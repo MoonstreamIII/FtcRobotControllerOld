@@ -57,7 +57,7 @@ import static org.firstinspires.ftc.teamcode.core.DriveConstants.kV;
 
 @Config
 public class StandardMechanumDrive extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(12, 0, 0.15);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0, 0, 0.1);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(0.9, 0, 0.2);
 
     public static double LATERAL_MULTIPLIER = 1;
@@ -147,6 +147,7 @@ public class StandardMechanumDrive extends MecanumDrive {
         if (RUN_USING_ENCODER) {
             setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
+
 
         setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
