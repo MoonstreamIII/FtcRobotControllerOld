@@ -24,7 +24,7 @@ public class FieldConstants {
     public static Pose2d centerC = new Pose2d(68, -48, toRadians(90)); // Theoretical: x = 60, y = -48
 
     // Theoretical: x = -31, y = -48
-    public static Pose2d backPoseA = new Pose2d(-40,-32, toRadians(0)); // -49.25, -28
+    public static Pose2d backPoseA = new Pose2d(-40,-30, toRadians(0)); // -49.25, -28
     public static Pose2d backPoseB = new Pose2d(-31, -48, toRadians(0)); // -47.5, -44
     public static Pose2d backPoseC = new Pose2d(-31,-48, toRadians(0)); // -52, -26
 

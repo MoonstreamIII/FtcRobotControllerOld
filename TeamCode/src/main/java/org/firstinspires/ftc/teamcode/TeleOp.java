@@ -121,6 +121,10 @@ public class TeleOp extends OpMode {
             telemetry.addLine("Rings present");
         } else actuation.killFlywheel();*/
 
+        if(update1.dPadDown()){
+            targettingTowerGoal = !targettingTowerGoal;
+        }
+
         if(update1.square()) {
             if(targettingTowerGoal)
                 actuation.preheatShooter(TOWER_GOAL);
