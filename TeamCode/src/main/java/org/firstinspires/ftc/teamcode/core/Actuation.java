@@ -147,9 +147,10 @@ public class Actuation {
 
     public void shoot(Target target, StandardMechanumDrive drive, double offset) {
         if (shoot == null || feeder == null) return;
-        Pose2d pose = drive.getPoseEstimate();
+        Pose2d pose = localizer.getPoseEstimate();
 
         double destination = target.pos().minus(pose.vec()).angle();
+        destination = destination > PI ? destination - 2 * PI : destination;
 
 
         if (linearOpMode == null) { // If we are in TeleOp
@@ -175,15 +176,15 @@ public class Actuation {
         shoot.setVelocity(target == TOWER_GOAL ? -4.0 : -3.9*//*calcInitialSpeed(target)*//*, AngleUnit.RADIANS);
         if (linearOpMode != null)
             linearOpMode.sleep(700); *///TODO: Find appropriate delay, enough to let the motor shoot.
-        drive.update();
+        localizer.update();
     }
 
     public void powerShots(StandardMechanumDrive drive) {
-        shoot(POWER_SHOT_RIGHT, drive, .18);
+        shoot(POWER_SHOT_RIGHT, drive, .14);
         if(linearOpMode != null) linearOpMode.sleep(750);
-        shoot(POWER_SHOT_MIDDLE, drive, .12);
+        shoot(POWER_SHOT_MIDDLE, drive, .05);
         if(linearOpMode != null) linearOpMode.sleep(750);
-        shoot(POWER_SHOT_LEFT, drive, .06);
+        shoot(POWER_SHOT_LEFT, drive, 0);
     }
 
     public void preheatShooter(double velocity) {

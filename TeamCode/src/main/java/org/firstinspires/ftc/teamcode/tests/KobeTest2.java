@@ -46,6 +46,8 @@ public class KobeTest2 extends OpMode {
     public static double turnOffsetMiddle = .18;
     public static double turnOffsetRight = 0.18;
 
+    double feederPosIncrement = .01;
+    double feederPos = 0;
 
 
     double linearVelocity = 0; // m/s
@@ -90,6 +92,11 @@ public class KobeTest2 extends OpMode {
         else
             feeder.setPosition(FEEDER_REST);
 
+        if(update.dPadLeft())
+            feederPos -= feederPosIncrement;
+        if(update.dPadRight())
+            feederPos += feederPosIncrement;
+
         drive.setDrivePower(
                 new Pose2d(
                         powerScale(gamepad1.left_stick_y, .35),
@@ -131,13 +138,13 @@ public class KobeTest2 extends OpMode {
         telemetry.addLine("Use dPad Up/Down to change motor speed");
         telemetry.addData("Set velocity (rad/s)", angularVelocity);
         telemetry.addData("Actual velocity (rad/s)", shooter.getVelocity(AngleUnit.RADIANS));
-
+//        telemetry.addData("Feeder pos")
 
         /*telemetry.addData("x", poseEstimate.getX());
         telemetry.addData("y", poseEstimate.getY());
         telemetry.addData("heading", Math.toDegrees(poseEstimate.getHeading()));*/
         telemetry.update();
-        drive.update();
+//        drive.update();
     }
     double calcInitialSpeed() {
         double h = TOWER_GOAL_VERTICAL_DISPLACEMENT; // in meters

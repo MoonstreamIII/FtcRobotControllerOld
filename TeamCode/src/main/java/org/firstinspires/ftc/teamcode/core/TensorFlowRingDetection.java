@@ -92,7 +92,7 @@ public class TensorFlowRingDetection {
         if (tfod != null) {
             List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
             if (updatedRecognitions != null) {
-                linearOpMode.sleep(1000);
+                linearOpMode.sleep(600);
                 while (linearOpMode.opModeIsActive()) {
                     updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {

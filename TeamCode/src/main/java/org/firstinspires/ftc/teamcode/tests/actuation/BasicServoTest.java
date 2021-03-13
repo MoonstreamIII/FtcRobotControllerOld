@@ -29,7 +29,7 @@ public class BasicServoTest extends OpMode {
 
         servo = hardwareMap.servo.get("wobbleGrab");
         servo2 = hardwareMap.servo.get("wobbleArm");
-//        servo3 = hardwareMap.servo.get("feeder");
+        servo3 = hardwareMap.servo.get("feeder");
 
 //        servo2.getController().pwmDisable();
 
@@ -60,11 +60,12 @@ public class BasicServoTest extends OpMode {
             position2 += increment;
 
         servo.setPosition(position);
-        servo2.setPosition(position2);
+        servo3.setPosition(position2);
         telemetry.addData("Increment level", increment);
 //        telemetry.addData("Press a and b to move to either ends", "");
         telemetry.addData("Current position wobble grab", servo.getPosition());
-        telemetry.addData("Current position wobble arm", servo2.getPosition());
+//        telemetry.addData("Current position wobble arm", servo2.getPosition());
+        telemetry.addData("Current feeder position", servo3.getPosition());
         telemetry.update();
     }
 }
