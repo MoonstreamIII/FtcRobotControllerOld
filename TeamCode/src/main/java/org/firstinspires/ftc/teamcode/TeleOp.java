@@ -2,14 +2,19 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.core.Actuation;
+import org.firstinspires.ftc.teamcode.core.ActuationConstants;
 import org.firstinspires.ftc.teamcode.core.StandardMechanumDrive;
 import org.firstinspires.ftc.teamcode.core.gamepad.GamepadEventPS;
 
 import static java.lang.Double.parseDouble;
+import static java.lang.Math.PI;
+import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_REST;
+import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_YEET;
+import static org.firstinspires.ftc.teamcode.core.ActuationConstants.Target.POWER_SHOT_LEFT;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.Target.POWER_SHOT_MIDDLE;
+import static org.firstinspires.ftc.teamcode.core.ActuationConstants.Target.POWER_SHOT_RIGHT;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.Target.TOWER_GOAL;
 import static org.firstinspires.ftc.teamcode.core.FieldConstants.autonStartPose;
 
@@ -25,17 +30,17 @@ import static org.firstinspires.ftc.teamcode.core.FieldConstants.autonStartPose;
 
  */
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
-
 public class TeleOp extends OpMode {
     StandardMechanumDrive drive;
     Actuation actuation;
     GamepadEventPS update1, update2;
-    boolean slowMode = false;
+    boolean normalslowMode = false;
+    boolean reverseSlowMode = false;
     boolean targettingTowerGoal = true; // Shooter is either set to target tower goal or powershot
 
     @Override
     public void init() {
-        drive = new StandardMechanumDrive(this.hardwareMap);
+        drive = new StandardMechanumDrive(hardwareMap);
         Pose2d startPose;
         String serialized = ""; /*hardwareMap.appContext.getSharedPreferences("Auton end pose", Context.MODE_PRIVATE)
                 .getString("serialized", "");*/
@@ -43,9 +48,9 @@ public class TeleOp extends OpMode {
             startPose = autonStartPose;
         else startPose = unserialize(serialized);
         drive.setPoseEstimate(startPose);
-        actuation = new Actuation(hardwareMap, drive.getLocalizer(), null);
+        actuation = new Actuation(hardwareMap, drive, null);
         update1 = new GamepadEventPS(gamepad1);
-        update2 = new GamepadEventPS(gamepad2);
+//        update2 = new GamepadEventPS(gamepad2);
 //        actuation.preheatShooter(TOWER_GOAL);
     }
 
@@ -53,11 +58,13 @@ public class TeleOp extends OpMode {
     public void loop() {
 
         // Translational movement
-        if(update1.leftStickButton())
-            slowMode = !slowMode;
+        if(update1.leftStickButton()) {
+            if(reverseSlowMode) reverseSlowMode = false;
+            normalslowMode = !normalslowMode;
+        }
 
 
-        if(slowMode) {
+        if(normalslowMode) {
             drive.setDrivePower(
                     new Pose2d(
                             powerScale(gamepad1.left_stick_y, .35),
@@ -81,7 +88,7 @@ public class TeleOp extends OpMode {
         if (gamepad1.left_trigger > .5) actuation.spitOut();
         if (gamepad1.right_trigger < .5 && gamepad2.left_trigger < .5) actuation.stopIntake();
 
-        // Wobble grabber/arm functionality (triangle, square)
+        // Wobble grabber/arm functionality (left/right bumpers)
         if(update1.rightBumper()) {
             if(actuation.isWobbleArmUp())
                 actuation.wobbleArmDown();
@@ -94,38 +101,38 @@ public class TeleOp extends OpMode {
             else actuation.wobbleClawOpen();
         }
 
-/*        if (update1.triangle()) {
-            if (actuation.isWobbleArmUp()) {
-                ElapsedTime timer = new ElapsedTime();
-                actuation.wobbleArmDown();
-                try {
-                    Thread.sleep(600);
-                    actuation.wobbleClawOpen();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-            } else {
-                actuation.wobbleClawClose();
-                try {
-                    Thread.sleep(300);
-                    actuation.wobbleArmUp();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }*/
-
         /*if (actuation.hasRings()) {
             actuation.preheatShooter();
             telemetry.addLine("Rings present");
         } else actuation.killFlywheel();*/
+        
+        // Inverse + Slow
+        if(gamepad1.dpad_up) {
+            reverseSlowMode = true;
+            drive.setWeightedDrivePower(new Pose2d(-0.35, 0, 0));
 
-        if(update1.dPadDown()){
-            targettingTowerGoal = !targettingTowerGoal;
         }
 
+        if(reverseSlowMode) {
+            drive.setWeightedDrivePower(
+                    new Pose2d(
+                            -powerScale(gamepad1.left_stick_y, .35),
+                            -powerScale(gamepad1.left_stick_x, .35),
+                            -powerScale(gamepad1.right_stick_x, .35)
+                    )
+            );
+        }
+
+
+        if(gamepad1.dpad_left)
+            drive.setWeightedDrivePower(new Pose2d(0, -0.2, 0));
+
+        if(gamepad1.dpad_right)
+            drive.setWeightedDrivePower(new Pose2d(0, 0.2, 0));
+
+
         if(update1.square()) {
+            targettingTowerGoal = !targettingTowerGoal;
             if(targettingTowerGoal)
                 actuation.preheatShooter(TOWER_GOAL);
             else actuation.preheatShooter(POWER_SHOT_MIDDLE);
@@ -136,9 +143,31 @@ public class TeleOp extends OpMode {
 
 
         if(update1.circle())
-            actuation.shoot(drive);
-        if(update1.triangle())
-            actuation.powerShots(drive);
+            actuation.shoot();
+
+        if(update1.triangle()) {
+            ActuationConstants.Target[] targets = {POWER_SHOT_RIGHT, POWER_SHOT_MIDDLE, POWER_SHOT_LEFT};
+            for (int i = 0; i < 3; i++) {
+                Pose2d pose = drive.getPoseEstimate();
+
+                double destination = targets[i].pos().minus(pose.vec()).angle();
+                destination = destination > PI ? destination - 2 * PI : destination;
+
+                drive.turn(destination - ((pose.getHeading() > PI) ? pose.getHeading() - (2 * PI) : pose.getHeading()) - 0.18);
+                actuation.feeder.setPosition(FEEDER_YEET);
+                try {
+                    Thread.sleep(500);
+                    actuation.feeder.setPosition(FEEDER_REST);
+                    Thread.sleep(500);
+                    actuation.feeder.setPosition(FEEDER_YEET);
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+//            actuation.powerShots();
+        }
 
         if(update1.share())
             actuation.killFlywheel();
@@ -147,7 +176,8 @@ public class TeleOp extends OpMode {
         telemetry.addData("cross", drive.getPoseEstimate().getX());
         telemetry.addData("y", drive.getPoseEstimate().getY());
         telemetry.addData("heading", drive.getPoseEstimate().getHeading());*/
-        telemetry.addData("Slow Mode", slowMode ? "On" : "Off");
+        telemetry.addData("Inverse slow mode", reverseSlowMode? "On" : "Off");
+        telemetry.addData("Slow Mode", normalslowMode ? "On" : "Off");
         telemetry.addData("Targeting", targettingTowerGoal ? "Tower" : "Power Shots");
         telemetry.update();
         drive.update();

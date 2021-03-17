@@ -58,7 +58,7 @@ import static org.firstinspires.ftc.teamcode.core.DriveConstants.kV;
 @Config
 public class StandardMechanumDrive extends MecanumDrive {
     public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(6, 0, 0.1);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(0, 0, 0);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(2, 0, 0);
 
     public static double LATERAL_MULTIPLIER = 1;
 
@@ -116,7 +116,7 @@ public class StandardMechanumDrive extends MecanumDrive {
         ));
         accelConstraint = new ProfileAccelerationConstraint(MAX_ACCEL);
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
-                new Pose2d(0.5, 0.5, Math.toRadians(2.0)), 0.5);
+                new Pose2d(0.5, 0.5, Math.toRadians(2.0)), 1.0);
 
         poseHistory = new LinkedList<>();
 
@@ -166,8 +166,8 @@ public class StandardMechanumDrive extends MecanumDrive {
         return new TrajectoryBuilder(startPose, reversed, velConstraint, accelConstraint);
     }
 
-    public TrajectoryBuilder trajectoryBuilder(Pose2d startPose, double startHeading) {
-        return new TrajectoryBuilder(startPose, startHeading, velConstraint, accelConstraint);
+    public TrajectoryBuilder trajectoryBuilder(Pose2d startPose, double startTangent) {
+        return new TrajectoryBuilder(startPose, startTangent, velConstraint, accelConstraint);
     }
 
     public void turnAsync(double angle) {
@@ -191,14 +191,6 @@ public class StandardMechanumDrive extends MecanumDrive {
         waitForIdle();
     }
 
-    public void absoluteTurn(double angle) {
-        followTrajectory(
-                trajectoryBuilder(getPoseEstimate())
-                        .lineToLinearHeading(
-                                new Pose2d(getPoseEstimate().getX(), getPoseEstimate().getY(), angle))
-                        .build());
-    }
-
     public void followTrajectoryAsync(Trajectory trajectory) {
         follower.followTrajectory(trajectory);
         mode = Mode.FOLLOW_TRAJECTORY;
@@ -207,13 +199,6 @@ public class StandardMechanumDrive extends MecanumDrive {
     public void followTrajectory(Trajectory trajectory) {
         followTrajectoryAsync(trajectory);
         waitForIdle();
-    }
-
-    public TrajectoryBuilder staticSpline(Vector2d end, double endHeading) {
-        return trajectoryBuilder(getPoseEstimate()).splineToConstantHeading(end, endHeading);
-    }
-    public TrajectoryBuilder staticSpline(Vector2d end) {
-        return trajectoryBuilder(getPoseEstimate()).splineToConstantHeading(end, 0);
     }
 
     public Pose2d getLastError() {
@@ -245,7 +230,7 @@ public class StandardMechanumDrive extends MecanumDrive {
 
         packet.put("mode", mode);
 
-        packet.put("cross", currentPose.getX());
+        packet.put("x", currentPose.getX());
         packet.put("y", currentPose.getY());
         packet.put("heading", currentPose.getHeading());
 

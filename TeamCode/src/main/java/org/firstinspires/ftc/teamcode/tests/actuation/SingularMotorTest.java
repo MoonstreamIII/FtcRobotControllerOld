@@ -9,7 +9,7 @@ public class SingularMotorTest extends LinearOpMode {
     DcMotor motor;
     @Override
     public void runOpMode() throws InterruptedException {
-        motor = hardwareMap.dcMotor.get("motor");
+        motor = hardwareMap.dcMotor.get("shooter");
         if(isStopRequested()) return;
         waitForStart();
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

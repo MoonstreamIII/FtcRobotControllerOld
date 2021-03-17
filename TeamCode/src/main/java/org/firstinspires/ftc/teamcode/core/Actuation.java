@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.core;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.localization.Localizer;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,11 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
-import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODERS;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODER;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
@@ -48,9 +45,9 @@ public class Actuation {
 
     DcMotorEx shoot;
     DcMotor intake;
-    Servo wobbleGrab, wobbleArm, feeder;
+    public Servo wobbleGrab, wobbleArm, feeder;
     HardwareMap hardwareMap;
-    Localizer localizer;
+    StandardMechanumDrive drive;
     LinearOpMode linearOpMode;
     RevColorSensorV3 colorsensor;
     boolean shot;
@@ -58,17 +55,17 @@ public class Actuation {
     /**
      * For Autonomous initialization specifically.
      */
-    public Actuation(LinearOpMode linearOpMode, Localizer localizer) {
-        this(linearOpMode.hardwareMap, localizer, linearOpMode);
+    public Actuation(LinearOpMode linearOpMode, StandardMechanumDrive drive) {
+        this(linearOpMode.hardwareMap, drive, linearOpMode);
         this.linearOpMode = linearOpMode;
     }
 
     /**
      * For TeleOp initialization specifically.
      */
-    public Actuation(HardwareMap hardwareMap, Localizer localizer, LinearOpMode linearOpMode) {
+    public Actuation(HardwareMap hardwareMap, StandardMechanumDrive drive, LinearOpMode linearOpMode) {
         this.hardwareMap = hardwareMap;
-        this.localizer = localizer;
+        this.drive = drive;
         this.linearOpMode = linearOpMode;
 
         if (hardwareMap.dcMotor.contains("intake")) {
@@ -131,23 +128,22 @@ public class Actuation {
     /**
      * Turns the shooter (or robot if necessary) to face the red goal, then fires.
      */
-    public void shoot(StandardMechanumDrive drive) {
-        shoot(TOWER_GOAL, drive);
+    public void shoot() {
+        shoot(TOWER_GOAL);
     }
 
     /**
      * Turns the shooter (or robot if necessary) to face the given target, and fires.
+     *  @param target position to fire at
      *
-     * @param target position to fire at
-     * @param drive  driving instance to turn robot if necessary (>150 degrees)
      */
-    public void shoot(Target target, StandardMechanumDrive drive) {
-        shoot(target, drive, .18);
+    public void shoot(Target target) {
+        shoot(target, 0.18);
     }
 
-    public void shoot(Target target, StandardMechanumDrive drive, double offset) {
+    public void shoot(Target target, double offset) {
         if (shoot == null || feeder == null) return;
-        Pose2d pose = localizer.getPoseEstimate();
+        Pose2d pose = drive.getPoseEstimate();
 
         double destination = target.pos().minus(pose.vec()).angle();
         destination = destination > PI ? destination - 2 * PI : destination;
@@ -160,6 +156,17 @@ public class Actuation {
                                 .lineToLinearHeading(new Pose2d(SHOOT_LINE - 9, pose.getY(), destination))
                                 .build()
                 );
+
+
+                drive.turn(destination - ((pose.getHeading() > PI) ? pose.getHeading() - (2 * PI) : pose.getHeading()) - offset);
+
+                try {
+                    feeder.setPosition(FEEDER_YEET);
+                    Thread.sleep(500);
+                    feeder.setPosition(FEEDER_REST);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         } else {
             linearOpMode.telemetry.addData("Start angle", pose.getHeading());
@@ -176,15 +183,32 @@ public class Actuation {
         shoot.setVelocity(target == TOWER_GOAL ? -4.0 : -3.9*//*calcInitialSpeed(target)*//*, AngleUnit.RADIANS);
         if (linearOpMode != null)
             linearOpMode.sleep(700); *///TODO: Find appropriate delay, enough to let the motor shoot.
-        localizer.update();
+        drive.update();
     }
 
-    public void powerShots(StandardMechanumDrive drive) {
-        shoot(POWER_SHOT_RIGHT, drive, .14);
-        if(linearOpMode != null) linearOpMode.sleep(750);
-        shoot(POWER_SHOT_MIDDLE, drive, .05);
-        if(linearOpMode != null) linearOpMode.sleep(750);
-        shoot(POWER_SHOT_LEFT, drive, 0);
+    public void shootInPlace(int times) {
+        for(int i = 0; i < times; i++) {
+            feeder.setPosition(FEEDER_YEET);
+            linearOpMode.sleep(500);
+            feeder.setPosition(FEEDER_REST);
+            linearOpMode.sleep(500);
+        }
+    }
+
+    public void powerShots(double rightOffset, double middleOffset, double leftOffset) {
+
+        try {
+            shoot(POWER_SHOT_RIGHT, rightOffset);
+            Thread.sleep(750);
+            shoot(POWER_SHOT_MIDDLE, middleOffset);
+            Thread.sleep(750);
+            shoot(POWER_SHOT_LEFT, leftOffset);
+        }
+        catch (InterruptedException e) { e.printStackTrace(); }
+    }
+
+    public void powerShots() {
+        powerShots(0.14,0.06,0.04);
     }
 
     public void preheatShooter(double velocity) {
@@ -193,7 +217,7 @@ public class Actuation {
 
     public void preheatShooter(Target target) {
         if (shoot != null)
-            shoot.setVelocity(target == TOWER_GOAL ? -4.0 : -3.9, AngleUnit.RADIANS);
+            shoot.setVelocity(target == TOWER_GOAL ? -4.0 : -3.6, AngleUnit.RADIANS);
     }
 
     public void killFlywheel() {
@@ -217,19 +241,19 @@ public class Actuation {
         switch (target) {
             case TOWER_GOAL:
                 h = TOWER_GOAL_VERTICAL_DISPLACEMENT;
-                d = localizer.getPoseEstimate().vec().distTo(redGoal);
+                d = drive.getPoseEstimate().vec().distTo(redGoal);
                 break;
             case POWER_SHOT_LEFT:
                 h = POWER_SHOT_FIRE_VERTICAL_DISPLACEMENT;
-                d = localizer.getPoseEstimate().vec().distTo(leftPowerShot);
+                d = drive.getPoseEstimate().vec().distTo(leftPowerShot);
                 break;
             case POWER_SHOT_RIGHT:
                 h = POWER_SHOT_FIRE_VERTICAL_DISPLACEMENT;
-                d = localizer.getPoseEstimate().vec().distTo(rightPowerShot);
+                d = drive.getPoseEstimate().vec().distTo(rightPowerShot);
                 break;
             case POWER_SHOT_MIDDLE:
                 h = POWER_SHOT_FIRE_VERTICAL_DISPLACEMENT;
-                d = localizer.getPoseEstimate().vec().distTo(centerPowerShot);
+                d = drive.getPoseEstimate().vec().distTo(centerPowerShot);
                 break;
         }
         double linearSpeed = sqrt((pow(d, 2) * g) / (pow(cos(LAUNCHER_ANGLE), 2) * (2 * d * tan(LAUNCHER_ANGLE) - 2 * h)));

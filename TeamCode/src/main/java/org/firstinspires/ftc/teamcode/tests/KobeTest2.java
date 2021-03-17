@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -34,6 +35,7 @@ import static org.firstinspires.ftc.teamcode.core.FieldConstants.autonStartPose;
 import static org.firstinspires.ftc.teamcode.core.FieldConstants.leftPowerShot;
 
 @Config
+@Disabled
 @TeleOp(name = "Kobe Test Part 2")
 public class KobeTest2 extends OpMode {
     DcMotorEx shooter;

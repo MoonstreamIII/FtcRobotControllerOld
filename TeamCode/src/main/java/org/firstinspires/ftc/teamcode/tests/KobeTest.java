@@ -1,37 +1,24 @@
 package org.firstinspires.ftc.teamcode.tests;
 
-import android.icu.util.Measure;
-import android.icu.util.MeasureUnit;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
-import com.acmerobotics.roadrunner.kinematics.Kinematics;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.core.gamepad.GamepadEventPS;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import kotlin.collections.CollectionsKt;
-import kotlin.collections.MapsKt;
-
+@Disabled
 @TeleOp
 public class KobeTest extends OpMode {
     DcMotor shooter;

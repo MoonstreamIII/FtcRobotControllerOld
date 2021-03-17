@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 
 import org.firstinspires.ftc.teamcode.core.gamepad.GamepadEventPS;
 
-@TeleOp
+@TeleOp(name = "CR Servo Test", group = "Tests")
 public class ContinuousServoTest extends OpMode {
     CRServo servo;
     double power = 0;

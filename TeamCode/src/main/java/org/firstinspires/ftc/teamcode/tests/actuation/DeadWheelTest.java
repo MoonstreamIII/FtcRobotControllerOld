@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.tests.actuation;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@TeleOp
+@Disabled
+@TeleOp(name = "Deadwheel Test", group = "Tests")
 public class DeadWheelTest extends OpMode {
     DcMotor rightDeadwheel;
     DcMotor leftDeadwheel;

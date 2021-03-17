@@ -15,6 +15,8 @@ import org.firstinspires.ftc.teamcode.core.StandardMechanumDrive;
 import org.firstinspires.ftc.teamcode.core.TensorFlowRingDetection;
 
 import static java.lang.Math.toRadians;
+import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_REST;
+import static org.firstinspires.ftc.teamcode.core.ActuationConstants.FEEDER_YEET;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.Target.POWER_SHOT_LEFT;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.Target.POWER_SHOT_MIDDLE;
 import static org.firstinspires.ftc.teamcode.core.ActuationConstants.Target.POWER_SHOT_RIGHT;
@@ -50,7 +52,7 @@ public class AutonomousRemote extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         drive = new StandardMechanumDrive(hardwareMap);
         drive.setPoseEstimate(autonStartPose);
-        actuation = new Actuation(this, drive.getLocalizer());
+        actuation = new Actuation(this, drive);
         ringDetection = new TensorFlowRingDetection(this);
 
         waitForStart();
@@ -84,13 +86,7 @@ public class AutonomousRemote extends LinearOpMode {
      */
     void wobbleRoutine(Pose2d center, Pose2d back) {
         // centerPose is a pose of the square's center (A/B/C), backPose is the position the robot will be in to collect the second wobble goal
-        Pose2d centerAgain;
-        /*if(center != centerA)
-            centerAgain = new Pose2d(center.getX(), center.getY(), toRadians(180));
-        else
-            centerAgain = centerA;*/
-        centerAgain = center;
-
+        Pose2d centerAgain = center;
         centerAgain = new Pose2d(centerAgain.getX() - 10, centerAgain.getY() + 5, centerAgain.getHeading());
 
         if(center.epsilonEquals(centerC))
@@ -110,21 +106,21 @@ public class AutonomousRemote extends LinearOpMode {
 
         // Go back to start area to get 2nd wobble, go back to same square
         drive.followTrajectory(
-                drive.trajectoryBuilder(drive.getPoseEstimate(), toRadians(90))
+                drive.trajectoryBuilder(drive.getPoseEstimate(), toRadians(180))
                         .splineToLinearHeading(back, toRadians(180))
+//                        .splineTo(back.vec(), toRadians(180))
                         .build()
         );
 
         // Collect 2nd wobble (right side), go back to drop off second wobble and place it
         actuation.wobbleArmDown();
-        sleep(1000);
+        sleep(1200);
         actuation.wobbleClawClose();
         sleep(750);
         actuation.wobbleArmSlightltyUp();
 
-
         drive.followTrajectory(
-                drive.trajectoryBuilder(drive.getPoseEstimate(), toRadians(90))
+                drive.trajectoryBuilder(drive.getPoseEstimate(), drive.getPoseEstimate().getHeading())
                         .splineToLinearHeading(centerAgain, toRadians(180))
                         .build()
         );
@@ -132,24 +128,27 @@ public class AutonomousRemote extends LinearOpMode {
     }
 
     private void performCase(String ringCase) {
-        Trajectory startToRings = drive.trajectoryBuilder(autonStartPose).splineToConstantHeading(ringPos, 0).build();
+        Trajectory startToRings;
         switch (ringCase) {
             case "None": // Zero rings, case "A"
-                actuation.preheatShooter(-3.7);
-                sleep(1000);
+                actuation.preheatShooter(-3.675);
+                sleep(750);
+//                drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).splineToConstantHeading(ringPos, 0).build());
                 drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).forward(60).build());
-                actuation.powerShots(drive);
+
+                actuation.powerShots();
+
                 actuation.killFlywheel();
                 wobbleRoutine(centerA, backPoseA);
                 break;
 
             case LABEL_SECOND_ELEMENT: // One ring, case "B", "Single"
-                actuation.preheatShooter(-3.9);
+                actuation.preheatShooter(-3.85);
 
                 drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).lineToLinearHeading(new Pose2d(-43,-33)).build());
 
 
-                actuation.shoot(TOWER_GOAL, drive, .1);
+                actuation.shoot(TOWER_GOAL, 0.15);
 
 //                actuation.preheatShooter(TOWER_GOAL);
                 actuation.suck();
@@ -158,13 +157,8 @@ public class AutonomousRemote extends LinearOpMode {
 
                 telemetry.addData("current pose", drive.getPoseEstimate().toString());
 
-//                actuation.powerShots(drive);
-                actuation.preheatShooter(-3.675);
-                actuation.shoot(POWER_SHOT_RIGHT, drive, .2);
-                sleep(750);
-                actuation.shoot(POWER_SHOT_MIDDLE, drive, .12);
-                sleep(750);
-                actuation.shoot(POWER_SHOT_LEFT, drive, .1);
+                actuation.preheatShooter(-3.66);
+                actuation.powerShots(0.15,0.05,0.04);
 
                 actuation.stopIntake();
                 actuation.killFlywheel();
@@ -173,14 +167,13 @@ public class AutonomousRemote extends LinearOpMode {
 
             case LABEL_FIRST_ELEMENT: // 4 rings, case "C", "Quad"
 
-                actuation.preheatShooter(-4.1);
+                actuation.preheatShooter(-4.0);
                 drive.followTrajectory(drive.trajectoryBuilder(drive.getPoseEstimate()).forward(12).build());
 
-                actuation.shoot(TOWER_GOAL,drive,.14);
+                actuation.shoot(TOWER_GOAL, 0.16);
                 sleep(500);
-                actuation.shoot(TOWER_GOAL,drive, .14);
-                sleep(500);
-                actuation.shoot(TOWER_GOAL, drive,.14);
+
+                actuation.shootInPlace(2);
 
                 actuation.preheatShooter(POWER_SHOT_RIGHT);
                 actuation.suck();
@@ -188,15 +181,10 @@ public class AutonomousRemote extends LinearOpMode {
                 startToRings = drive.trajectoryBuilder(drive.getPoseEstimate()).splineToConstantHeading(ringPos, 0).build();
                 drive.followTrajectory(startToRings);
 
-
                 actuation.preheatShooter(-3.675);
-                actuation.shoot(POWER_SHOT_RIGHT, drive, .14);
-                sleep(750);
-                actuation.stopIntake();
-                actuation.shoot(POWER_SHOT_MIDDLE, drive, .05);
-                sleep(750);
-                actuation.shoot(POWER_SHOT_LEFT, drive, 0);
+                actuation.powerShots(0.14,0.05,0.0);
 
+                actuation.stopIntake();
                 actuation.killFlywheel();
 
                 wobbleRoutine(centerC, backPoseC);
