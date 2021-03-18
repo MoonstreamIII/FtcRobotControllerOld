@@ -1,17 +1,19 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 @SuppressWarnings("FieldCanBeLocal")
-@TeleOp(name="TableBot Op Mode - Linear",group="Linear")
+@TeleOp(name="Test Telemetry Sync",group="Linear")
 //@Disabled
-public class TableBot_Linear extends LinearOpMode {
+public class CHEEZBOT_TestTelemetrySync extends LinearOpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     //lfd is left front drive
@@ -28,22 +30,13 @@ public class TableBot_Linear extends LinearOpMode {
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        lfd  = hardwareMap.get(DcMotor.class, HardwareReference.LEFT_FRONT_DRIVE);
-        rfd = hardwareMap.get(DcMotor.class, HardwareReference.RIGHT_FRONT_DRIVE);
-        lbd  = hardwareMap.get(DcMotor.class, HardwareReference.LEFT_REAR_DRIVE);
-        rbd = hardwareMap.get(DcMotor.class, HardwareReference.RIGHT_REAR_DRIVE);
-        //foo = hardwareMap.get(DcMotor.class, "foo_motor");
 
-        // Most robots need the motor on one side to be reversed to drive forward
-        // Reverse the motor that runs backwards when connected directly to the battery
-        lfd.setDirection(DcMotor.Direction.FORWARD);
-        rfd.setDirection(DcMotor.Direction.REVERSE);
-        lbd.setDirection(DcMotor.Direction.FORWARD);
-        rbd.setDirection(DcMotor.Direction.REVERSE);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -76,20 +69,13 @@ public class TableBot_Linear extends LinearOpMode {
             // - This requires no math, but it is hard to drive forward slowly and keep straight.
             // leftPower  = -gamepad1.left_stick_y ;
             // rightPower = -gamepad1.right_stick_y ;
-
-            // Send calculated power to wheels
-            lfd.setPower(Range.clip(leftPower+strafe, -1.0, 1.0));
-            rfd.setPower(Range.clip(rightPower-strafe, -1.0, 1.0));
-            lbd.setPower(Range.clip(leftPower-strafe, -1.0, 1.0));
-            rbd.setPower(Range.clip(rightPower+strafe, -1.0, 1.0));
+            double leftX=gamepad1.left_stick_x;
+            double leftY=gamepad1.left_stick_y;
 
 
             // Show the elapsed game time and wheel power.
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("TestThings","leftPower: (%.2f), rightPower: (%.2f), strafe:(%.2f)",leftPower,rightPower,strafe);
-            telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-            telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-            telemetry.update();
+            dashboardTelemetry.addData("TestThings","leftX: (%.2f), leftY: (%.2f)",leftX,leftY);
+            dashboardTelemetry.update();
         }
     }
 

@@ -93,6 +93,7 @@ public class Test_Motors extends LinearOpMode {
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motor", "power (%.2f)", power);
+            telemetry.addData("activeMotor",""+activeMotor);
             telemetry.update();
         }
     }
