@@ -40,10 +40,10 @@ public class TableBot_Linear extends LinearOpMode {
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        lfd.setDirection(DcMotor.Direction.FORWARD);
-        rfd.setDirection(DcMotor.Direction.REVERSE);
-        lbd.setDirection(DcMotor.Direction.FORWARD);
-        rbd.setDirection(DcMotor.Direction.REVERSE);
+        lfd.setDirection(DcMotor.Direction.REVERSE);
+        rfd.setDirection(DcMotor.Direction.FORWARD);
+        lbd.setDirection(DcMotor.Direction.REVERSE);
+        rbd.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();

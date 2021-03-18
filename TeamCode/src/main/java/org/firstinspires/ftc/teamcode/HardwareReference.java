@@ -14,6 +14,7 @@ public class HardwareReference {
     public static final String ARM_BOTTOM = "armbottom";
     public static final String ARM_TOP = "armtop";
     public static final String RING_LIFT = "ringlift";
+    public static final String RING_BELT = "ringbelt";
     public static final String HOOK_RIGHT = "hook_right";
     public static final String HOOK_LEFT = "hook_left";
     public static final String DOOR_SERVO = "door";

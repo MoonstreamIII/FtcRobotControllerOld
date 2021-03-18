@@ -1,18 +1,16 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 //This is a system where the triggers control the speed of the bot. For example, if you have the left stick at full forward and the left trigger half pressed in, you get half power.
 @SuppressWarnings("FieldCanBeLocal")
-@TeleOp(name="CHEEZBOT Op Mode - Linear Speed Toggling ENCODERS!",group="Linear")
+@TeleOp(name="CHEEZBOT Totally Normal Op Mode",group="Linear")
 //@Disabled
-public class CHEEZBOT_Linear_ModToggleEncoder extends LinearOpMode {
+public class CHEEZBOT_Linear_TotallyNormal extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -24,16 +22,24 @@ public class CHEEZBOT_Linear_ModToggleEncoder extends LinearOpMode {
     private DcMotor rfd = null;
     private DcMotor lbd = null;
     private DcMotor rbd = null;
-    private DcMotor ringLift = null;
-    private DcMotor ringBelt = null;
+    //private DcMotor ringLift = null;
+    //private Servo door = null;
     //Currently, all servo positions must remain on
     //the interval [0.13,0.87], or the servos will not respond.
     private final double lowPowerMod = 0.35;
     private final double highPowerMod = 0.7;
     private final double turnReductionLowPower = 0.80;
+    private final double doorOpen=45.0; //Open position for the door
+    private final double doorClosed=45.0; //Closed position for the door
+    private final boolean openIsPositive=doorOpen>=doorClosed;
+    private final double doorRate=0.1;//Rate of movement for the door
+    private final double dr =openIsPositive?doorRate:-doorRate;
+    private final double doorMin=Math.min(doorOpen,doorClosed);
+    private final double doorMax=Math.max(doorOpen,doorClosed);
     private boolean rightStrafe = false;
     private double modulation = 0;
     private boolean lowPower = false;
+    private double doorPos=doorClosed;
 
     @Override
     public void runOpMode() {
@@ -48,9 +54,8 @@ public class CHEEZBOT_Linear_ModToggleEncoder extends LinearOpMode {
         lbd  = hardwareMap.get(DcMotor.class, HardwareReference.LEFT_REAR_DRIVE);
         rbd = hardwareMap.get(DcMotor.class, HardwareReference.RIGHT_REAR_DRIVE);
         //foo = hardwareMap.get(DcMotor.class, "foo_motor");
-        ringLift = hardwareMap.get(DcMotor.class, HardwareReference.RING_LIFT);
-        ringBelt = hardwareMap.get(DcMotor.class, HardwareReference.RING_BELT);
-
+        //ringLift = hardwareMap.get(DcMotor.class, HardwareReference.RING_LIFT);
+        //door = hardwareMap.get(Servo.class,HardwareReference.DOOR_SERVO);
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -58,19 +63,18 @@ public class CHEEZBOT_Linear_ModToggleEncoder extends LinearOpMode {
         rfd.setDirection(DcMotor.Direction.REVERSE);
         lbd.setDirection(DcMotor.Direction.FORWARD);
         rbd.setDirection(DcMotor.Direction.REVERSE);
-        ringLift.setDirection(DcMotor.Direction.FORWARD);
-        ringBelt.setDirection(DcMotor.Direction.FORWARD);
         lfd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rfd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lbd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rbd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //door.setPosition(doorPos);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             // Setup a variable for each drive wheel to save power level for telemetry
-            double beltPower;
+            double doorChange;
             double leftPower;
             double rightPower;
             double liftPower;
@@ -98,6 +102,12 @@ public class CHEEZBOT_Linear_ModToggleEncoder extends LinearOpMode {
             if (gamepad1.right_bumper) {
                 lowPower = false;
             }
+            if (gamepad2.right_bumper) {
+                doorPos = doorOpen;
+            }
+            if (gamepad2.left_bumper) {
+                doorPos = doorClosed;
+            }
 
 
             // Choose to drive using either Tank Mode, or POV Mode
@@ -106,7 +116,7 @@ public class CHEEZBOT_Linear_ModToggleEncoder extends LinearOpMode {
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight.
             //NOTES: gamepad1.left_stick_y increases as stick goes down.
-            double drive = -gamepad1.left_stick_y+ -gamepad1.right_stick_y;
+            double drive = -gamepad1.left_stick_y+ -gamepad1.right_stick_y+-gamepad2.left_stick_y+ -gamepad2.right_stick_y;
             //double drive = Math.max( gamepad1.left_stick_y, Math.max(gamepad1.right_stick_y, gamepad1.right_trigger - gamepad1.left_trigger));
             double turn;
             double turnReduction = 1;
@@ -115,20 +125,18 @@ public class CHEEZBOT_Linear_ModToggleEncoder extends LinearOpMode {
             }
 
             if (rightStrafe) {
-                turn = -(gamepad1.left_stick_x*turnReduction);  //Turning using the left stick.
+                turn = -(gamepad1.left_stick_x*turnReduction)+(-(gamepad2.left_stick_x*turnReduction));  //Turning using the left stick.
             } else {
-                turn = -(gamepad1.right_stick_x*turnReduction);
+                turn = -(gamepad1.right_stick_x*turnReduction)+(-(gamepad2.right_stick_x*turnReduction));
             }
             double strafe;
             if (rightStrafe) {
-                strafe = -(gamepad1.right_stick_x);  //Strafing using the right stick
+                strafe = -(gamepad1.right_stick_x+gamepad2.right_stick_x);  //Strafing using the right stick
             } else
-                strafe = -(gamepad1.left_stick_x);  //Strafing using the right stick
+                strafe = -(gamepad1.left_stick_x+gamepad2.left_stick_x);  //Strafing using the right stick
             leftPower    = -(drive - turn);
             rightPower   = -(drive + turn);
-            liftPower = (-gamepad2.left_stick_y);
-            beltPower = (-gamepad2.right_stick_y);
-            //TODO maybe yeet some rings?
+            //liftPower = (-gamepad2.right_stick_y);
             /*cTODO closed = (gamepad2.right_bumper||gamepad2.left_bumper);*/
 
 
@@ -144,8 +152,8 @@ public class CHEEZBOT_Linear_ModToggleEncoder extends LinearOpMode {
             rfd.setPower(Range.clip((rightPower+strafe)*modulation, -1.0, 1.0));
             lbd.setPower(Range.clip((leftPower+strafe)*modulation, -1.0, 1.0));
             rbd.setPower(Range.clip((rightPower-strafe)*modulation, -1.0, 1.0));
-            ringLift.setPower(Range.clip(liftPower*0.25,-1.0,1.0));
-            ringBelt.setPower(Range.clip(beltPower*0.25,-1.0,1.0));
+            //ringLift.setPower(Range.clip(liftPower,-1.0,1.0));
+            //door.setPosition(doorPos);
 
 
 
