@@ -36,3 +36,4 @@ allprojects {
 }
 
 apply from: 'build.release.gradle'
+apply from: '../build.dependencies.gradle'
