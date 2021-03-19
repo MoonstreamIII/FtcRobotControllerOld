@@ -29,11 +29,13 @@ public class CHEEZBOT_Linear_ModToggleEncoder extends LinearOpMode {
     //Currently, all servo positions must remain on
     //the interval [0.13,0.87], or the servos will not respond.
     private final double lowPowerMod = 0.35;
-    private final double highPowerMod = 0.7;
+    private final double highPowerMod = 0.9;
     private final double turnReductionLowPower = 0.80;
     private boolean rightStrafe = false;
     private double modulation = 0;
     private boolean lowPower = false;
+    private double ringLiftMul = 0.75;
+    private double ringBeltMul = 1;
 
     @Override
     public void runOpMode() {
@@ -58,8 +60,8 @@ public class CHEEZBOT_Linear_ModToggleEncoder extends LinearOpMode {
         rfd.setDirection(DcMotor.Direction.REVERSE);
         lbd.setDirection(DcMotor.Direction.FORWARD);
         rbd.setDirection(DcMotor.Direction.REVERSE);
-        ringLift.setDirection(DcMotor.Direction.FORWARD);
-        ringBelt.setDirection(DcMotor.Direction.FORWARD);
+        ringLift.setDirection(DcMotor.Direction.REVERSE);
+        ringBelt.setDirection(DcMotor.Direction.REVERSE);
         lfd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rfd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lbd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -144,8 +146,8 @@ public class CHEEZBOT_Linear_ModToggleEncoder extends LinearOpMode {
             rfd.setPower(Range.clip((rightPower+strafe)*modulation, -1.0, 1.0));
             lbd.setPower(Range.clip((leftPower+strafe)*modulation, -1.0, 1.0));
             rbd.setPower(Range.clip((rightPower-strafe)*modulation, -1.0, 1.0));
-            ringLift.setPower(Range.clip(liftPower*0.25,-1.0,1.0));
-            ringBelt.setPower(Range.clip(beltPower*0.25,-1.0,1.0));
+            ringLift.setPower(Range.clip(liftPower*ringLiftMul,-1.0,1.0));
+            ringBelt.setPower(Range.clip(beltPower*ringBeltMul,-1.0,1.0));
 
 
 
