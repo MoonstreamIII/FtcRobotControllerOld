@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -36,27 +37,29 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Disabled
-@Autonomous(name="Skybot: Auto Under Bridge Right Encoded", group="Skybot")
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
+//@Disabled
+@Autonomous(name="CHEEZBOT: Auto Test", group="Skybot")
 public class CHEEZBOT_Auto_Test extends LinearOpMode {
     /* Declare OpMode members. */
-    private ElapsedTime     runtime = new ElapsedTime();
+    private ElapsedTime runtime = new ElapsedTime();
     private DcMotor lfd = null;
     private DcMotor rfd = null;
     private DcMotor lbd = null;
     private DcMotor rbd = null;
-    private Servo leftHand = null;
-    private Servo rightHand = null;
-    static final double FORWARD_SPEED = AutoReference.UnderBridgeEncoder.power;
-    private static final double TURN_SPEED    = AutoReference.UnderBridgeEncoder.power;
-    private final double leg1 = AutoReference.UnderBridge.leg1;
-    private final double leg2 = AutoReference.UnderBridge.leg2;
-    private final double leg3 = AutoReference.UnderBridge.leg3;
-    private DcMotor topSlide = null;
-    private DcMotor bottomSlide = null;
+    private static final double TURN_SPEED    =AutoReference.power;
+    private final double leg1 = AutoReference.leg1;
+    private final double leg2 = AutoReference.leg2;
+    private final double leg3 = AutoReference.leg3;
+    private DcMotor ringBelt = null;
+    private final double beltPwr=AutoReference.ringBeltPower;
+    private final boolean debug=AutoReference.debug;
 
     @Override
     public void runOpMode() {
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        Telemetry dashboardTelemetry = dashboard.getTelemetry();
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
@@ -64,11 +67,19 @@ public class CHEEZBOT_Auto_Test extends LinearOpMode {
         rfd = hardwareMap.get(DcMotor.class, HardwareReference.RIGHT_FRONT_DRIVE);
         lbd  = hardwareMap.get(DcMotor.class, HardwareReference.LEFT_REAR_DRIVE);
         rbd = hardwareMap.get(DcMotor.class, HardwareReference.RIGHT_REAR_DRIVE);
-        lfd.setDirection(DcMotor.Direction.FORWARD);
-        rfd.setDirection(DcMotor.Direction.REVERSE);
-        lbd.setDirection(DcMotor.Direction.FORWARD);
-        rbd.setDirection(DcMotor.Direction.REVERSE);
-
+        ringBelt = hardwareMap.get(DcMotor.class, HardwareReference.RING_BELT);
+        lfd.setDirection(DcMotor.Direction.REVERSE);
+        rfd.setDirection(DcMotor.Direction.FORWARD);
+        lbd.setDirection(DcMotor.Direction.REVERSE);
+        rbd.setDirection(DcMotor.Direction.FORWARD);
+        lfd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rfd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lbd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rbd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lfd.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rfd.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lbd.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rbd.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         /*
          * Initialize the drive system variables.
          * The init() method of the hardware class does all the work here
@@ -76,59 +87,54 @@ public class CHEEZBOT_Auto_Test extends LinearOpMode {
 
 
         // Send telemetry message to signify robot waiting;
-        telemetry.addData("Status", "Ready to run");    //
-        telemetry.update();
+        dashboardTelemetry.addData("Status", "Ready to run");    //
+        dashboardTelemetry.update();
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        while (opModeIsActive() && (runtime.seconds() < leg3)) {
-            telemetry.addData("Path", "Leg 0: %2.5f S Elapsed", runtime.seconds());
-            telemetry.update();
-        }
-        lbd.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lbd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        // Step through each leg of the path, ensuring that the Auto mode has not been stopped along the way
-        // Step through each leg of the path, ensuring that the Auto mode has not been stopped along the way
-        runtime.reset();
-        while (opModeIsActive() && (lbd.getCurrentPosition() < leg1)) {
-            telemetry.addData("Path", "Leg 1: %2.5f S Elapsed", runtime.seconds());
-            telemetry.addData("lbdPos", lbd.getCurrentPosition());
-            telemetry.update();
-        }
         lfd.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rbd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lfd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // Step 1:  Drive forward for 3 seconds
-        lfd.setPower(-TURN_SPEED);
-        rfd.setPower(TURN_SPEED);
+        if (debug) {
+            while (true) {
+                lfd.setPower(0.25);
+                dashboardTelemetry.addData("Encoder Pos:", "" + lfd.getCurrentPosition());
+                dashboardTelemetry.update();
+            }
+        } else {
+        double cor = AutoReference.correction;
+        lfd.setPower(TURN_SPEED);
         lbd.setPower(TURN_SPEED);
-        rbd.setPower(-TURN_SPEED);
+        rfd.setPower(TURN_SPEED*cor);
+        rbd.setPower(TURN_SPEED*cor);
         runtime.reset();
-        while (opModeIsActive() && (lbd.getCurrentPosition() < leg2)) {
-            telemetry.addData("Path", "Leg 2: %2.5f S Elapsed", runtime.seconds());
-            telemetry.update();
+        while (opModeIsActive() && (lfd.getCurrentPosition() < leg1)) {
+            dashboardTelemetry.addData("Path", "Leg 1: %2.5f S Elapsed", runtime.seconds());
+            dashboardTelemetry.update();
         }
+        lfd.setPower(0);
+        lbd.setPower(0);
+        rfd.setPower(0);
+        rbd.setPower(0);
+        ringBelt.setPower(beltPwr);
 
-        // Step 2:  Spin left 1.3 seconds
-        /*lfd.setPower(-TURN_SPEED);
-        rfd.setPower(TURN_SPEED);
-        lbd.setPower(-TURN_SPEED);
-        rbd.setPower(TURN_SPEED);
         runtime.reset();
         while (opModeIsActive() && (runtime.seconds() < leg2)) {
-            telemetry.addData("Path", "Leg 2: %2.5f S Elapsed", runtime.seconds());
-            telemetry.update();
+            dashboardTelemetry.addData("Path", "Leg 2: %2.5f S Elapsed", runtime.seconds());
+            dashboardTelemetry.update();
         }
-
-        // Step 3:  Drive Forwards for 1 Second
-        lfd.setPower(TURN_SPEED);
-        rfd.setPower(TURN_SPEED);
-        lbd.setPower(TURN_SPEED);
-        rbd.setPower(TURN_SPEED);
+        lfd.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lfd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        ringBelt.setPower(0);
+        lfd.setPower(-TURN_SPEED);
+        lbd.setPower(-TURN_SPEED);
+        rfd.setPower(-TURN_SPEED*cor);
+        rbd.setPower(-TURN_SPEED*cor);
         runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < leg3)) {
-            telemetry.addData("Path", "Leg 3: %2.5f S Elapsed", runtime.seconds());
-            telemetry.update();
-        }*/
+        while (opModeIsActive() && ((lfd.getCurrentPosition()) > leg3)) {
+            dashboardTelemetry.addData("Path", ""+lfd.getCurrentPosition());
+            dashboardTelemetry.update();
+        }}
 
         // Step 4:  Stop and close the claw.
         lfd.setPower(0);
@@ -136,8 +142,8 @@ public class CHEEZBOT_Auto_Test extends LinearOpMode {
         lbd.setPower(0);
         rbd.setPower(0);
 
-        telemetry.addData("Path", "Complete");
-        telemetry.update();
+        dashboardTelemetry.addData("Path", "Complete");
+        dashboardTelemetry.update();
         sleep(1000);
     }
 }

@@ -34,7 +34,7 @@ public class CHEEZBOT_Linear_ModToggleEncoder extends LinearOpMode {
     private boolean rightStrafe = false;
     private double modulation = 0;
     private boolean lowPower = false;
-    private double ringLiftMul = 0.75;
+    private double ringLiftMul = 1;
     private double ringBeltMul = 1;
 
     @Override
