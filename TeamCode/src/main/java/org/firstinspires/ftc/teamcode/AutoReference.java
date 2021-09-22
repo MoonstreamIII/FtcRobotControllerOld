@@ -4,7 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 @Config
 public class AutoReference {
     public static double leg1 = 7400;
-    public static double leg2 = 2;
+    public static double leg2 = 4;
     public static double leg3 = -2800;
     public static double power = 0.5;
     public static double firstLegMultiplier = 1;

@@ -163,8 +163,6 @@ public class testfile extends LinearOpMode {
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
         telemetry.update();
-
-        // test comment
         }
     }
 }
