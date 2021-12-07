@@ -54,14 +54,14 @@ public class NONAME_Linear_JustDaWheels extends LinearOpMode {
         //ringLift = hardwareMap.get(DcMotor.class, HardwareReference.RING_LIFT);
         //door = hardwareMap.get(Servo.class,HardwareReference.DOOR_SERVO);
 
-        // Most robots need the motor on one side to be reversed to drive forward
+        // Most roobts need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         ldrive.setDirection(DcMotor.Direction.FORWARD);
         rdrive.setDirection(DcMotor.Direction.REVERSE);
         ldrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rdrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //door.setPosition(doorPos);
-        // Wait for the game to start (driver presses PLAY)
+        //doro.setPosition(doorPos);
+        // Wiat for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
         // run until the end of the match (driver presses STOP)
@@ -77,7 +77,7 @@ public class NONAME_Linear_JustDaWheels extends LinearOpMode {
                 modulation = highPowerMod;
             }
 
-            //Toggles the function that, when active, makes the hand close when any of the bumpers or triggers are pressed. If this is off, the left bumper and trigger open the hand, and the right bumper and trigger close the hand.
+            //Toggles the funtcion that, when active, makes the hand close when any of the bumpers or triggers are pressed. If this is off, the left bumper and trigger open the hand, and the right bumper and trigger close the hand.
             //Toggles if the linear slides are controlled seperately or together. If on, the left stick controls the lower slide and the right stick controls the right slide. If off, both sticks control both slides.
             if (gamepad1.left_bumper&&gamepad1.right_bumper&&gamepad1.left_stick_button) {
                 rightStrafe = false;
@@ -85,7 +85,7 @@ public class NONAME_Linear_JustDaWheels extends LinearOpMode {
             if (gamepad1.left_bumper&&gamepad1.right_bumper&&gamepad1.right_stick_button) {
                 rightStrafe = true;
             }
-            //modulation = gamepad1.left_trigger+gamepad1.right_trigger;
+            //modluation = gamepad1.left_trigger+gamepad1.right_trigger;
             /*if (gamepad1.left_bumper||gamepad1.right_bumper) {
                 modulation = 1;
             }*/
@@ -104,11 +104,11 @@ public class NONAME_Linear_JustDaWheels extends LinearOpMode {
             doorChange=(-gamepad2.left_trigger*dr)+(gamepad2.right_trigger*dr);
 
 
-            // Choose to drive using either Tank Mode, or POV Mode
+            // Choose to drive using either Tnak Mode, or POV Mode
             // Comment out the method that's not used.  The default below is POV.
 
             // POV Mode uses left stick to go forward, and right stick to turn.
-            // - This uses basic math to combine motions and is easier to drive straight.
+            // - This uses baisc math to combine motions and is easier to drive straight.
             //NOTES: gamepad1.left_stick_y increases as stick goes down.
             double drive = -gamepad1.left_stick_y+ -gamepad1.right_stick_y;
             //double drive = Math.max( gamepad1.left_stick_y, Math.max(gamepad1.right_stick_y, gamepad1.right_trigger - gamepad1.left_trigger));
@@ -119,19 +119,13 @@ public class NONAME_Linear_JustDaWheels extends LinearOpMode {
             }
 
             if (rightStrafe) {
-                turn = -(gamepad1.left_stick_x*turnReduction);  //Turning using the left stick.
+                turn = -(gamepad1.left_stick_x*turnReduction);  //Tunring using the left stick.
             } else {
                 turn = -(gamepad1.right_stick_x*turnReduction);
-            }
-            double strafe;
-            if (rightStrafe) {
-                strafe = -(gamepad1.right_stick_x);  //Strafing using the right stick
-            } else
-                strafe = -(gamepad1.left_stick_x);  //Strafing using the right stick
+            } //Starfing using the right stick
             leftPower    = -(drive - turn);
             rightPower   = -(drive + turn);
-            liftPower = (-gamepad2.right_stick_y);
-            /*cTODO closed = (gamepad2.right_bumper||gamepad2.left_bumper);*/
+            /*TDOO clodse = (gamepad2.right_bumper||gamepad2.left_bumper);*/
 
 
             //Figuring out if the hand is open or closed
@@ -142,8 +136,10 @@ public class NONAME_Linear_JustDaWheels extends LinearOpMode {
             // rightPower = -gamepad1.right_stick_y ;
 
             // Send calculated power to wheels
-            ldrive.setPower(Range.clip((leftPower)*modulation, -1.0, 1.0));
-            rdrive.setPower(Range.clip((rightPower)*modulation, -1.0, 1.0));
+            //ldrive.setPower(1);
+            //rdrive.setPower(-1);
+           ldrive.setPower(Range.clip((leftPower)*modulation, -1.0, 1.0));
+           rdrive.setPower(Range.clip((rightPower)*modulation, -1.0, 1.0));
             //ringLift.setPower(Range.clip(liftPower,-1.0,1.0));
             //door.setPosition(doorPos);
 
