@@ -20,6 +20,8 @@ public class HardwareReference {
     public static final String DOOR_SERVO = "door";
     public static final String RIGHT_DRIVE = "rtread";
     public static final String LEFT_DRIVE = "ltread";
+    public static final String BAND_DRUM="drum";
+    public static final String ARM="arm";
     //BrandonStuff
 
 }
