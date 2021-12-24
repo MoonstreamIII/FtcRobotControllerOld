@@ -31,13 +31,14 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-//@Disabled
+@Disabled
 @Autonomous(name="CHEEZBOT: Auto Test", group="Skybot")
 public class CHEEZBOT_Auto_Test extends LinearOpMode {
     /* Declare OpMode members. */
