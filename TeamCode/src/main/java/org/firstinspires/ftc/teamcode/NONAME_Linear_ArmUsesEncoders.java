@@ -11,9 +11,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 //NOTREADY <- you may see comments like this in the code. These represent code that would cause errors now that needs a specific fix. For example, the spinner isn't defined on or attached to the robot, so I leave it off for now.
 @SuppressWarnings("FieldCanBeLocal")
-@TeleOp(name="NONAME Op Mode - Arm Velocity Control",group="Linear")
+@TeleOp(name="NONAME Op Mode - Arm Encoder Control",group="Linear")
 //@Disabled
-public class NONAME_Linear_ArmVelocity extends LinearOpMode {
+public class NONAME_Linear_ArmUsesEncoders extends LinearOpMode {
     //Variable Initializations
     //Note: anything involving ArmRef.<something> is pulling variables from the ArmRef code. I put those variables there for ease of access, and also to allow FTCDashboard to access them.
     private ElapsedTime runtime = new ElapsedTime(); //Keeps track of the time during the code.
@@ -32,13 +32,8 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
     private double armPosX=ArmRef.posX;
     private double armPosY=ArmRef.posY;
     private boolean autoArm=true; //This is a debug variable, if it is false, then the arm motor shuts off, allowing for manual repositioning of the arm.
-    private double armVelocitySlope = ArmRef.VelocityMode.armVelocitySlope;
-    private double armPowerSlope = ArmRef.VelocityMode.armPowerSlope;
-    private double armPowerLimit= ArmRef.VelocityMode.armPowerLimit;
-    private double armVelocityLimit = ArmRef.VelocityMode.armVelocityLimit;
-    private double armInterp = ArmRef.VelocityMode.armInterp;
-    private double armVelInterp = ArmRef.VelocityMode.armVelInterp;
-    private double armPowAdjust = ArmRef.VelocityMode.armPowAdjust;
+    private double armPowerLimit = ArmRef.EncoderMode.armPowerLimit;
+    private double armPowerSlope = ArmRef.EncoderMode.armPowerSlope;
     private double targVelInterp=0.0;
     private double targPowerInterp=0.0;
     private double targetArmPos=0; //Target arm position, in encoder pulses.
@@ -69,7 +64,7 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
         //NOTREADY spinner.setDirection(DcMotorSimple.Direction.FORWARD);
         //NOTREADY spinner.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //This sets the arm's position to 0, to set the origin.
-        arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         pastTime=runtime.milliseconds();
         pastPos=0;
         // Wait for the game to start (driver presses PLAY)
@@ -93,13 +88,8 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
             armPosB=ArmRef.posB;
             armPosX=ArmRef.posX;
             armPosY=ArmRef.posY;
-            armVelocitySlope = ArmRef.VelocityMode.armVelocitySlope;
-            armPowerSlope= ArmRef.VelocityMode.armPowerSlope;
-            armPowerLimit= ArmRef.VelocityMode.armPowerLimit;
-            armVelocityLimit = ArmRef.VelocityMode.armVelocityLimit;
-            armInterp = ArmRef.VelocityMode.armInterp;
-            armVelInterp = ArmRef.VelocityMode.armVelInterp;
-            armPowAdjust = ArmRef.VelocityMode.armPowAdjust;
+            armPowerLimit = ArmRef.EncoderMode.armPowerLimit;
+            armPowerSlope = ArmRef.EncoderMode.armPowerSlope;
             if (gamepad1.a&&!gamepad1.start) { //If A is pressed, set the target arm position to the preset for A.
                 targetArmPos = armPosA;
             }
@@ -114,7 +104,7 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
             }
             if (gamepad1.left_bumper&&gamepad1.right_bumper) { //If both bumpers are pressed, zero the arm positions again.
                 arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
             double drumPower=0; //This makes the drum controlled by the triggers.
             drumPower+=gamepad1.right_trigger;
@@ -136,36 +126,12 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
             if (targetArmPos<0) {
                 targetArmPos=0;
             }
+            double armDiff=Math.abs(targetArmPos-arm.getCurrentPosition());
+            arm.setTargetPosition((int)targetArmPos);
+            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            arm.setPower(Range.clip(armDiff/armPowerSlope,-1.0,1.0)*armPowerLimit);
 
 
-
-            //This calculates the target power+direction that should be delivered to the arm motor. I'm currently in the process of writing a better version of the arm control code.
-            double armPower=0;
-            targetArmPos+=gamepad1.right_stick_y; //Allows for fine control of arm position using the right stick.
-            double posDiff=targetArmPos-arm.getCurrentPosition();
-            double targetArmVelocity=(Range.clip(posDiff/armVelocitySlope,-1.0,1.0)*armVelocityLimit);
-            targVelInterp+=(targetArmVelocity-targVelInterp)*armVelInterp;
-            //Calculate the current velocity of the arm (calculated in encoder positions/ms)
-            thisPos=arm.getCurrentPosition();
-            thisTime=runtime.milliseconds();
-            double timeChange=thisTime-pastTime;
-            double posChange=thisPos-pastPos;
-            double armVelocity=posChange/timeChange;
-            double velocity=pastVel+((armVelocity-pastVel)*armInterp);
-            double velDiff=targVelInterp-velocity;
-            if (autoArm) { //If autoArm is on, but the arm is set to 0 power, have the motor hold its position. If autoArm is not on, have the motor not hold its position so it can be manually readjusted.
-                arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            } else {
-                arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            }
-            double targetArmPower=Range.clip(velDiff/armPowerSlope,-1.0,1.0);
-            targPowerInterp+=targetArmPower*armPowAdjust;
-            targPowerInterp=Range.clip(targPowerInterp,-armPowerLimit,armPowerLimit);
-            if (autoArm) {
-                arm.setPower(Range.clip(targPowerInterp, -armPowerLimit, armPowerLimit));
-            } else {
-                arm.setPower(0);
-            }
             //Set the spinner to be controlled by the bumpers.
             /*NOTREADY double spinnerPower=0;
             if (gamepad1.left_bumper) {
@@ -185,20 +151,8 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
             int armPos=arm.getCurrentPosition();
             dashboardTelemetry.addData("Arm Pos", arm.getCurrentPosition());
             dashboardTelemetry.addData("Target Arm Pos", targetArmPos);
-            dashboardTelemetry.addData("Arm Pos Change", posChange);
-            dashboardTelemetry.addData("Arm Pos Diff", posDiff);
-            dashboardTelemetry.addData("Time Diff", timeChange);
-            dashboardTelemetry.addData("Target Arm Power",targetArmPower);
-            dashboardTelemetry.addData("Target Arm Velocity", targetArmVelocity);
-            dashboardTelemetry.addData("Arm Velocity", armVelocity);
-            dashboardTelemetry.addData("Arm Velocity (Interpolated)",velocity);
-            dashboardTelemetry.addData("Target Arm Velocity (Interpolated)",targVelInterp);
-            dashboardTelemetry.addData("Target Arm Power (Interpolated)",targPowerInterp);
             dashboardTelemetry.addData("AutoArm", "State: "+(autoArm?"True":"False"));
             dashboardTelemetry.update();
-            pastPos=thisPos;
-            pastTime=thisTime;
-            pastVel=velocity;
             //TODO: Make it possible to switch telemetry to the Driver Station App.
         }
     }
