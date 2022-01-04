@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,9 +11,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 //NOTREADY <- you may see comments like this in the code. These represent code that would cause errors now that needs a specific fix. For example, the spinner isn't defined on or attached to the robot, so I leave it off for now.
 @SuppressWarnings("FieldCanBeLocal")
-@TeleOp(name="NONAME Op Mode - Arm Velocity Control",group="Linear")
-@Disabled
-public class NONAME_Linear_ArmVelocity extends LinearOpMode {
+@TeleOp(name="NONAME Op Mode - Arm Velocity Control Telemetry",group="Linear")
+//@Disabled
+public class NONAME_Linear_ArmGravityTelem extends LinearOpMode {
     //Variable Initializations
     //Note: anything involving ArmRef.<something> is pulling variables from the ArmRef code. I put those variables there for ease of access, and also to allow FTCDashboard to access them.
     private ElapsedTime runtime = new ElapsedTime(); //Keeps track of the time during the code.
@@ -42,14 +41,18 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
     private double armPowAdjust = ArmRef.VelocityMode.armPowAdjust;
     private double targVelInterp=0.0;
     private double targPowerInterp=0.0;
+    public int zeroPos=ArmRef.GravMode.zeroPos;
+    public double gravPow=ArmRef.GravMode.gravPow;
+    public double sidewaysDist =ArmRef.GravMode.sidewaysDist;
+    public double sidewaysPos=zeroPos- sidewaysDist;
     private double targetArmPos=0; //Target arm position, in encoder pulses.
     private double modulation = 0.7; //Multiplier for how much the motor power should be reduced.
     private boolean xlock=false; //This is a variable used to detect if X is being held, explained later.
 
     @Override
     public void runOpMode() {
-        FtcDashboard dashboard = FtcDashboard.getInstance(); //Initializing Dashboard
-        Telemetry dashboardTelemetry = dashboard.getTelemetry();
+        //FtcDashboard dashboard = FtcDashboard.getInstance(); //Initializing Dashboard
+        //  Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
         ldrive  = hardwareMap.get(DcMotor.class, HardwareReference.LEFT_DRIVE); //Initializing all the motors with the names from the HardwareReference.
         rdrive = hardwareMap.get(DcMotor.class, HardwareReference.RIGHT_DRIVE);
@@ -68,7 +71,7 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
         drum.setDirection(DcMotor.Direction.FORWARD);
         drum.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //NOTREADY spinner.setDirection(DcMotorSimple.Direction.FORWARD);
-        //NOTREADY spinner.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //NOTREADY spinner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //This sets the arm's position to 0, to set the origin.
         arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         pastTime=runtime.milliseconds();
@@ -88,28 +91,16 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
             if (!gamepad2.x&&!gamepad2.start) {
                 xlock=false;
             }
-            //Collecting values from ArmRef, and by extension, FTCDashboard, again to allow for live debugging without having to reset the code every time.
-            armPosA=ArmRef.posA;
-            armPosB=ArmRef.posB;
-            armPosX=ArmRef.posX;
-            armPosY=ArmRef.posY;
-            armVelocitySlope = ArmRef.VelocityMode.armVelocitySlope;
-            armPowerSlope= ArmRef.VelocityMode.armPowerSlope;
-            armPowerLimit= ArmRef.VelocityMode.armPowerLimit;
-            armVelocityLimit = ArmRef.VelocityMode.armVelocityLimit;
-            armInterp = ArmRef.VelocityMode.armInterp;
-            armVelInterp = ArmRef.VelocityMode.armVelInterp;
-            armPowAdjust = ArmRef.VelocityMode.armPowAdjust;
-            if (gamepad1.a&&!gamepad1.start) { //If A is pressed, set the target arm position to the preset for A.
+            if (gamepad1.x&&!gamepad1.start) { //If A is pressed, set the target arm position to the preset for A.
                 targetArmPos = armPosA;
             }
-            if (gamepad1.b&&!gamepad1.start) { //If B is pressed, set the target arm position to the preset for B.
+            if (gamepad1.y&&!gamepad1.start) { //If B is pressed, set the target arm position to the preset for B.
                 targetArmPos = armPosB;
             }
-            if (gamepad1.x&&!gamepad1.start) { //If X is pressed, set the target arm position to the preset for X.
+            if (gamepad1.a&&!gamepad1.start) { //If X is pressed, set the target arm position to the preset for X.
                 targetArmPos = armPosX;
             }
-            if (gamepad1.y&&!gamepad1.start) { //If Y is pressed, set the target arm position to the preset for Y.
+            if (gamepad1.b&&!gamepad1.start) { //If Y is pressed, set the target arm position to the preset for Y.
                 targetArmPos = armPosY;
             }
             if (gamepad1.left_bumper&&gamepad1.right_bumper) { //If both bumpers are pressed, zero the arm positions again.
@@ -142,19 +133,22 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
             //This calculates the target power+direction that should be delivered to the arm motor. I'm currently in the process of writing a better version of the arm control code.
             double armPower=0;
             targetArmPos+=gamepad1.right_stick_y; //Allows for fine control of arm position using the right stick.
+            armPowAdjust=ArmRef.VelocityMode.armPowAdjust;
             double posDiff=targetArmPos-arm.getCurrentPosition();
             double targetArmVelocity=(Range.clip(posDiff/armVelocitySlope,-1.0,1.0)*armVelocityLimit);
             targVelInterp+=(targetArmVelocity-targVelInterp)*armVelInterp;
             //Calculate the current velocity of the arm (calculated in encoder positions/ms)
             thisPos=arm.getCurrentPosition();
             thisTime=runtime.milliseconds();
+            double armAngRad=Math.cos(((arm.getCurrentPosition()-sidewaysPos)*Math.PI)/(sidewaysDist*2));
+            double armGravComp=armAngRad*gravPow;
             double timeChange=thisTime-pastTime;
             double posChange=thisPos-pastPos;
             double armVelocity=posChange/timeChange;
             double velocity=pastVel+((armVelocity-pastVel)*armInterp);
             double velDiff=targVelInterp-velocity;
             if (autoArm) { //If autoArm is on, but the arm is set to 0 power, have the motor hold its position. If autoArm is not on, have the motor not hold its position so it can be manually readjusted.
-                arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             } else {
                 arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             }
@@ -162,7 +156,8 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
             targPowerInterp+=targetArmPower*armPowAdjust;
             targPowerInterp=Range.clip(targPowerInterp,-armPowerLimit,armPowerLimit);
             if (autoArm) {
-                arm.setPower(Range.clip(targPowerInterp, -armPowerLimit, armPowerLimit));
+                armPower=targPowerInterp+armGravComp;
+                arm.setPower(Range.clip(armPower, -1.0, 1.0));
             } else {
                 arm.setPower(0);
             }
@@ -183,23 +178,25 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
 
             //Sending telemetry feedback back to Dashboard.
             int armPos=arm.getCurrentPosition();
-            dashboardTelemetry.addData("Arm Pos", arm.getCurrentPosition());
-            dashboardTelemetry.addData("Target Arm Pos", targetArmPos);
-            dashboardTelemetry.addData("Arm Pos Change", posChange);
-            dashboardTelemetry.addData("Arm Pos Diff", posDiff);
-            dashboardTelemetry.addData("Time Diff", timeChange);
-            dashboardTelemetry.addData("Target Arm Power",targetArmPower);
-            dashboardTelemetry.addData("Target Arm Velocity", targetArmVelocity);
-            dashboardTelemetry.addData("Arm Velocity", armVelocity);
-            dashboardTelemetry.addData("Arm Velocity (Interpolated)",velocity);
-            dashboardTelemetry.addData("Target Arm Velocity (Interpolated)",targVelInterp);
-            dashboardTelemetry.addData("Target Arm Power (Interpolated)",targPowerInterp);
-            dashboardTelemetry.addData("AutoArm", "State: "+(autoArm?"True":"False"));
-            dashboardTelemetry.update();
+            telemetry.addData("Arm Pos", arm.getCurrentPosition());
+            telemetry.addData("Target Arm Pos", targetArmPos);
+            telemetry.addData("Arm Pos Change", posChange);
+            telemetry.addData("Arm Pos Diff", posDiff);
+            telemetry.addData("Time Diff", timeChange);
+            telemetry.addData("Target Arm Power",targetArmPower);
+            telemetry.addData("Target Arm Velocity", targetArmVelocity);
+            telemetry.addData("Arm Velocity", armVelocity);
+            telemetry.addData("Arm Velocity (Interpolated)",velocity);
+            telemetry.addData("Target Arm Velocity (Interpolated)",targVelInterp);
+            telemetry.addData("Target Arm Power (Interpolated)",targPowerInterp);
+            telemetry.addData("AutoArm", "State: "+(autoArm?"True":"False"));
+            telemetry.addData("Arm Gravity Compensation",armGravComp);
+            telemetry.addData("Arm Angle (Radians)",armAngRad);
+            telemetry.addData("armPower",armPower);
+            telemetry.update();
             pastPos=thisPos;
             pastTime=thisTime;
             pastVel=velocity;
-            //TODO: Make it possible to switch telemetry to the Driver Station App.
         }
     }
 }

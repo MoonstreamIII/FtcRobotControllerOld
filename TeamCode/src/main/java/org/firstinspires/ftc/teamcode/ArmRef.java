@@ -5,9 +5,10 @@ import com.acmerobotics.dashboard.config.Config;
 @Config
 public class ArmRef {
     public static double posA=150;
-    public static double posB=0;
-    public static double posX=0;
+    public static double posB=25;
+    public static double posX=790;
     public static double posY=630;
+    public static double adjust=0.0001;
     @Config
     public static class PowerMode {
         public static double armError=0;
@@ -22,12 +23,18 @@ public class ArmRef {
     }
     @Config
     public static class VelocityMode {
-        public static double armVelocitySlope =100; //Based on position
-        public static double armPowerSlope=1.0; //Based on velocity
-        public static double armPowerLimit=0.7;
-        public static double armVelocityLimit =0.3;
-        public static double armInterp=0.8;
-        public static double armVelInterp=0.2;
-        public static double armPowAdjust =0.1;
+        public static double armVelocitySlope =150; //Based on position
+        public static double armPowerSlope=1.5 ; //Based on velocity
+        public static double armPowerLimit=0.35;
+        public static double armVelocityLimit =0.5;
+        public static double armInterp=1;
+        public static double armVelInterp=1;
+        public static double armPowAdjust =0.05;
+    }
+    @Config
+    public static class GravMode {
+        public static int zeroPos=460;
+        public static double gravPow=0.4;
+        public static double sidewaysDist =320;
     }
 }

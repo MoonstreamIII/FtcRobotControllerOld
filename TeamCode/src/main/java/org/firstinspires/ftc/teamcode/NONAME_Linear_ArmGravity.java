@@ -12,9 +12,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 //NOTREADY <- you may see comments like this in the code. These represent code that would cause errors now that needs a specific fix. For example, the spinner isn't defined on or attached to the robot, so I leave it off for now.
 @SuppressWarnings("FieldCanBeLocal")
-@TeleOp(name="NONAME Op Mode - Arm Velocity Control",group="Linear")
-@Disabled
-public class NONAME_Linear_ArmVelocity extends LinearOpMode {
+@TeleOp(name="NONAME Op Mode - Arm Velocity Control with Gravity compensation",group="Linear")
+//@Disabled
+public class NONAME_Linear_ArmGravity extends LinearOpMode {
     //Variable Initializations
     //Note: anything involving ArmRef.<something> is pulling variables from the ArmRef code. I put those variables there for ease of access, and also to allow FTCDashboard to access them.
     private ElapsedTime runtime = new ElapsedTime(); //Keeps track of the time during the code.
@@ -42,6 +42,10 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
     private double armPowAdjust = ArmRef.VelocityMode.armPowAdjust;
     private double targVelInterp=0.0;
     private double targPowerInterp=0.0;
+    public int zeroPos=ArmRef.GravMode.zeroPos;
+    public double gravPow=ArmRef.GravMode.gravPow;
+    public double sidewaysDist =ArmRef.GravMode.sidewaysDist;
+    public double sidewaysPos=zeroPos- sidewaysDist;
     private double targetArmPos=0; //Target arm position, in encoder pulses.
     private double modulation = 0.7; //Multiplier for how much the motor power should be reduced.
     private boolean xlock=false; //This is a variable used to detect if X is being held, explained later.
@@ -100,6 +104,10 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
             armInterp = ArmRef.VelocityMode.armInterp;
             armVelInterp = ArmRef.VelocityMode.armVelInterp;
             armPowAdjust = ArmRef.VelocityMode.armPowAdjust;
+            zeroPos=ArmRef.GravMode.zeroPos;
+            gravPow=ArmRef.GravMode.gravPow;
+            sidewaysDist =ArmRef.GravMode.sidewaysDist;
+            sidewaysPos=zeroPos- sidewaysDist;
             if (gamepad1.a&&!gamepad1.start) { //If A is pressed, set the target arm position to the preset for A.
                 targetArmPos = armPosA;
             }
@@ -142,19 +150,22 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
             //This calculates the target power+direction that should be delivered to the arm motor. I'm currently in the process of writing a better version of the arm control code.
             double armPower=0;
             targetArmPos+=gamepad1.right_stick_y; //Allows for fine control of arm position using the right stick.
+            armPowAdjust=ArmRef.VelocityMode.armPowAdjust;
             double posDiff=targetArmPos-arm.getCurrentPosition();
             double targetArmVelocity=(Range.clip(posDiff/armVelocitySlope,-1.0,1.0)*armVelocityLimit);
             targVelInterp+=(targetArmVelocity-targVelInterp)*armVelInterp;
             //Calculate the current velocity of the arm (calculated in encoder positions/ms)
             thisPos=arm.getCurrentPosition();
             thisTime=runtime.milliseconds();
+            double armAngRad=Math.cos(((arm.getCurrentPosition()-sidewaysPos)*Math.PI)/(sidewaysDist*2));
+            double armGravComp=armAngRad*gravPow;
             double timeChange=thisTime-pastTime;
             double posChange=thisPos-pastPos;
             double armVelocity=posChange/timeChange;
             double velocity=pastVel+((armVelocity-pastVel)*armInterp);
             double velDiff=targVelInterp-velocity;
             if (autoArm) { //If autoArm is on, but the arm is set to 0 power, have the motor hold its position. If autoArm is not on, have the motor not hold its position so it can be manually readjusted.
-                arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             } else {
                 arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             }
@@ -162,7 +173,8 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
             targPowerInterp+=targetArmPower*armPowAdjust;
             targPowerInterp=Range.clip(targPowerInterp,-armPowerLimit,armPowerLimit);
             if (autoArm) {
-                arm.setPower(Range.clip(targPowerInterp, -armPowerLimit, armPowerLimit));
+                armPower=targPowerInterp+armGravComp;
+                arm.setPower(Range.clip(armPower, -1.0, 1.0));
             } else {
                 arm.setPower(0);
             }
@@ -195,6 +207,9 @@ public class NONAME_Linear_ArmVelocity extends LinearOpMode {
             dashboardTelemetry.addData("Target Arm Velocity (Interpolated)",targVelInterp);
             dashboardTelemetry.addData("Target Arm Power (Interpolated)",targPowerInterp);
             dashboardTelemetry.addData("AutoArm", "State: "+(autoArm?"True":"False"));
+            dashboardTelemetry.addData("Arm Gravity Compensation",armGravComp);
+            dashboardTelemetry.addData("Arm Angle (Radians)",armAngRad);
+            dashboardTelemetry.addData("armPower",armPower);
             dashboardTelemetry.update();
             pastPos=thisPos;
             pastTime=thisTime;
