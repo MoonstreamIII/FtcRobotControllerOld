@@ -28,7 +28,7 @@ public class NONAME_Linear_ArmGravityTelemSpinners extends LinearOpMode {
     private double armPosB=ArmRef.posB;
     private double armPosX=ArmRef.posX;
     private double armPosY=ArmRef.posY;
-    private boolean autoArm=true; //This is a debug variable, if it is false, then the arm motor shuts off, allowing for manual repositioning of the arm.
+    private boolean autoArm=ArmRef.autoArm; //This is a debug variable, if it is false, then the arm motor shuts off, allowing for manual repositioning of the arm.
     private double armVelocitySlope = ArmRef.VelocityMode.armVelocitySlope;
     private double armPowerSlope = ArmRef.VelocityMode.armPowerSlope;
     private double armPowerLimit= ArmRef.VelocityMode.armPowerLimit;
@@ -69,6 +69,7 @@ public class NONAME_Linear_ArmGravityTelemSpinners extends LinearOpMode {
         drum.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spinner.setDirection(DcMotor.Direction.FORWARD);
         spinner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        spinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //This sets the arm's position to 0, to set the origin.
         arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         pastTime=runtime.milliseconds();
@@ -88,22 +89,22 @@ public class NONAME_Linear_ArmGravityTelemSpinners extends LinearOpMode {
             if (!gamepad2.x&&!gamepad2.start) {
                 xlock=false;
             }
-            if (gamepad1.x&&!gamepad1.start) { //If A is pressed, set the target arm position to the preset for A.
+            if (gamepad1.a&&!gamepad1.start) { //If A is pressed, set the target arm position to the preset for A.
                 targetArmPos = armPosA;
             }
-            if (gamepad1.y&&!gamepad1.start) { //If B is pressed, set the target arm position to the preset for B.
+            if (gamepad1.b&&!gamepad1.start) { //If B is pressed, set the target arm position to the preset for B.
                 targetArmPos = armPosB;
             }
-            if (gamepad1.a&&!gamepad1.start) { //If X is pressed, set the target arm position to the preset for X.
+            if (gamepad1.x&&!gamepad1.start) { //If X is pressed, set the target arm position to the preset for X.
                 targetArmPos = armPosX;
             }
-            if (gamepad1.b&&!gamepad1.start) { //If Y is pressed, set the target arm position to the preset for Y.
+            if (gamepad1.y&&!gamepad1.start) { //If Y is pressed, set the target arm position to the preset for Y.
                 targetArmPos = armPosY;
             }
-            if (gamepad1.left_bumper&&gamepad1.right_bumper) { //If both bumpers are pressed, zero the arm positions again.
+            /*if (gamepad1.left_bumper&&gamepad1.right_bumper) { //If both bumpers are pressed, zero the arm positions again.
                 arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            }
+            }*/
             double drumPower=0; //This makes the drum controlled by the triggers.
             drumPower+=gamepad1.right_trigger;
             drumPower-=gamepad1.left_trigger;
@@ -117,20 +118,23 @@ public class NONAME_Linear_ArmGravityTelemSpinners extends LinearOpMode {
             //This runs the calculations for motor power based on stick position.
             double drive = -gamepad1.left_stick_y;
             double turn = gamepad1.left_stick_x;
-            leftPower    = (drive - turn);
-            rightPower   = (drive + turn);
+            leftPower    = (drive + turn);
+            rightPower   = (drive - turn);
 
             //This prevents the arm from thinking it should go farther down than it can, to prevent it from pressing into the control hub.
             if (targetArmPos<0) {
                 targetArmPos=0;
             }
 
-
+            double armPowAdjustMul=1.0;
 
             //This calculates the target power+direction that should be delivered to the arm motor. I'm currently in the process of writing a better version of the arm control code.
+            if (gamepad1.right_stick_button) {
+                armPowAdjustMul=2.0;
+            }
             double armPower=0;
             targetArmPos+=gamepad1.right_stick_y; //Allows for fine control of arm position using the right stick.
-            armPowAdjust=ArmRef.VelocityMode.armPowAdjust;
+            armPowAdjust=ArmRef.VelocityMode.armPowAdjust*armPowAdjustMul;
             double posDiff=targetArmPos-arm.getCurrentPosition();
             double targetArmVelocity=(Range.clip(posDiff/armVelocitySlope,-1.0,1.0)*armVelocityLimit);
             targVelInterp+=(targetArmVelocity-targVelInterp)*armVelInterp;

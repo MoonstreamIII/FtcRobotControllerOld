@@ -5,10 +5,11 @@ import com.acmerobotics.dashboard.config.Config;
 @Config
 public class ArmRef {
     public static double posA=150;
-    public static double posB=25;
+    public static double posB=0;
     public static double posX=790;
-    public static double posY=630;
+    public static double posY=590;
     public static double adjust=0.0001;
+    public static boolean autoArm=true;
     @Config
     public static class PowerMode {
         public static double armError=0;
