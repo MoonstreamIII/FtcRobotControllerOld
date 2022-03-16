@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 //NOTREADY <- you may see comments like this in the code. These represent code that would cause errors now that needs a specific fix. For example, the spinner isn't defined on or attached to the robot, so I leave it off for now.
 @SuppressWarnings("FieldCanBeLocal")
 @TeleOp(name="NONAME Op Mode - Arm Velocity Control Telemetry",group="Linear")
-//@Disabled
+@Disabled
 public class NONAME_Linear_ArmGravityTelem extends LinearOpMode {
     //Variable Initializations
     //Note: anything involving ArmRef.<something> is pulling variables from the ArmRef code. I put those variables there for ease of access, and also to allow FTCDashboard to access them.
