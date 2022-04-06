@@ -1,5 +1,4 @@
 package org.firstinspires.ftc.teamcode;
-//hello
 import com.acmerobotics.dashboard.config.Config;
 
 @Config

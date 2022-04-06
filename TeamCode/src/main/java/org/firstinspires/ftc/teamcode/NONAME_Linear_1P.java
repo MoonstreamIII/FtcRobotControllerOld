@@ -143,7 +143,7 @@ public class NONAME_Linear_1P extends LinearOpMode {
             thisPos=arm.getCurrentPosition();
             thisTime=runtime.milliseconds();
             double armAngRad=Math.cos(((arm.getCurrentPosition()-sidewaysPos)*Math.PI)/(sidewaysDist*2));
-            double armGravComp=armAngRad*gravPow;
+            double  armGravComp=armAngRad*gravPow;
             double timeChange=thisTime-pastTime;
             double posChange=thisPos-pastPos;
             double armVelocity=posChange/timeChange;
