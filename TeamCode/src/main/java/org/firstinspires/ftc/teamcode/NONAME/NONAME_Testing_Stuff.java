@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.NONAME;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.ArmRef;
+import org.firstinspires.ftc.teamcode.HardwareReference;
 
 //NOTREADY <- you may see comments like this in the code. These represent code that would cause errors now that needs a specific fix. For example, the spinner isn't defined on or attached to the robot, so I leave it off for now.
 @SuppressWarnings("FieldCanBeLocal")
@@ -58,7 +60,7 @@ public class NONAME_Testing_Stuff extends LinearOpMode {
         runtime.reset();
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            double adjust=ArmRef.adjust;
+            double adjust= ArmRef.adjust;
             // Setup a variable for each drive wheel
             double leftPower;
             double rightPower;

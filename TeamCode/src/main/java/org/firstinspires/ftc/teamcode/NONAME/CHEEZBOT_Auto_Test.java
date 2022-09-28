@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.NONAME;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -37,6 +37,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.AutoReference;
+import org.firstinspires.ftc.teamcode.HardwareReference;
 
 @Disabled
 @Autonomous(name="CHEEZBOT: Auto Test", group="Skybot")
@@ -47,7 +49,7 @@ public class CHEEZBOT_Auto_Test extends LinearOpMode {
     private DcMotor rfd = null;
     private DcMotor lbd = null;
     private DcMotor rbd = null;
-    private static final double TURN_SPEED    =AutoReference.power;
+    private static final double TURN_SPEED    = AutoReference.power;
     private final double leg1 = AutoReference.leg1;
     private final double leg2 = AutoReference.leg2;
     private final double leg3 = AutoReference.leg3;

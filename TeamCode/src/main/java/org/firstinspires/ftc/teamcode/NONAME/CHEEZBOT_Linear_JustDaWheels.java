@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.NONAME;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -7,11 +7,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.HardwareReference;
+
 //This is a system where the triggers control the speed of the bot. For example, if you have the left stick at full forward and the left trigger half pressed in, you get half power.
 @SuppressWarnings("FieldCanBeLocal")
-@TeleOp(name="CHEEZBOT Totally Normal Op Mode",group="Linear")
+@TeleOp(name="CHEEZBOT Op Mode - JustDaWheels",group="Linear")
 @Disabled
-public class CHEEZBOT_Linear_TotallyNormal extends LinearOpMode {
+public class CHEEZBOT_Linear_JustDaWheels extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -109,6 +111,7 @@ public class CHEEZBOT_Linear_TotallyNormal extends LinearOpMode {
             if (gamepad2.left_bumper) {
                 doorPos = doorClosed;
             }
+            doorChange=(-gamepad2.left_trigger*dr)+(gamepad2.right_trigger*dr);
 
 
             // Choose to drive using either Tank Mode, or POV Mode
@@ -117,7 +120,7 @@ public class CHEEZBOT_Linear_TotallyNormal extends LinearOpMode {
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight.
             //NOTES: gamepad1.left_stick_y increases as stick goes down.
-            double drive = -gamepad1.left_stick_y+ -gamepad1.right_stick_y+-gamepad2.left_stick_y+ -gamepad2.right_stick_y;
+            double drive = -gamepad1.left_stick_y+ -gamepad1.right_stick_y;
             //double drive = Math.max( gamepad1.left_stick_y, Math.max(gamepad1.right_stick_y, gamepad1.right_trigger - gamepad1.left_trigger));
             double turn;
             double turnReduction = 1;
@@ -126,18 +129,18 @@ public class CHEEZBOT_Linear_TotallyNormal extends LinearOpMode {
             }
 
             if (rightStrafe) {
-                turn = -(gamepad1.left_stick_x*turnReduction)+(-(gamepad2.left_stick_x*turnReduction));  //Turning using the left stick.
+                turn = -(gamepad1.left_stick_x*turnReduction);  //Turning using the left stick.
             } else {
-                turn = -(gamepad1.right_stick_x*turnReduction)+(-(gamepad2.right_stick_x*turnReduction));
+                turn = -(gamepad1.right_stick_x*turnReduction);
             }
             double strafe;
             if (rightStrafe) {
-                strafe = -(gamepad1.right_stick_x+gamepad2.right_stick_x);  //Strafing using the right stick
+                strafe = -(gamepad1.right_stick_x);  //Strafing using the right stick
             } else
-                strafe = -(gamepad1.left_stick_x+gamepad2.left_stick_x);  //Strafing using the right stick
+                strafe = -(gamepad1.left_stick_x);  //Strafing using the right stick
             leftPower    = -(drive - turn);
             rightPower   = -(drive + turn);
-            //liftPower = (-gamepad2.right_stick_y);
+            liftPower = (-gamepad2.right_stick_y);
             /*cTODO closed = (gamepad2.right_bumper||gamepad2.left_bumper);*/
 
 
@@ -149,6 +152,7 @@ public class CHEEZBOT_Linear_TotallyNormal extends LinearOpMode {
             // rightPower = -gamepad1.right_stick_y ;
 
             // Send calculated power to wheels
+            doorPos=Range.clip(doorPos+doorChange,doorMin,doorMax);
             lfd.setPower(Range.clip((leftPower-strafe)*modulation, -1.0, 1.0));
             rfd.setPower(Range.clip((rightPower+strafe)*modulation, -1.0, 1.0));
             lbd.setPower(Range.clip((leftPower+strafe)*modulation, -1.0, 1.0));

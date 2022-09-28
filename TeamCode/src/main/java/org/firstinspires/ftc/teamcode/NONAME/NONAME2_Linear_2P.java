@@ -1,17 +1,19 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.NONAME;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.ArmRef;
+import org.firstinspires.ftc.teamcode.HardwareReference;
+
 //NOTREADY <- you may see comments like this in the code. These represent code that would cause errors now that needs a specific fix. For example, the spinner isn't defined on or attached to the robot, so I leave it off for now.
 @SuppressWarnings("FieldCanBeLocal")
-@TeleOp(name="NONAME 2.0 Op Mode - 1P",group="Linear")
+@TeleOp(name="NONAME 2.0 Op Mode - 2P",group="Linear")
 //@Disabled
-public class NONAME2_Linear_1P extends LinearOpMode {
+public class NONAME2_Linear_2P extends LinearOpMode {
     //Variable Initializations
     //Note: anything involving ArmRef.<something> is pulling variables from the ArmRef code. I put those variables there for ease of access, and also to allow FTCDashboard to access them.
     private ElapsedTime runtime = new ElapsedTime(); //Keeps track of the time during the code.
@@ -27,7 +29,7 @@ public class NONAME2_Linear_1P extends LinearOpMode {
     private double pastVel=0;
     private double thisTime= 0.0;
     private int thisPos=0;
-    private double armPosA=ArmRef.posA; //Setting arm positions based on the ArmRef class (I set them there mostly for ease of access and also because that's where FTCDashboard can access them)
+    private double armPosA= ArmRef.posA; //Setting arm positions based on the ArmRef class (I set them there mostly for ease of access and also because that's where FTCDashboard can access them)
     private double armPosB=ArmRef.posB;
     private double armPosX=ArmRef.posX;
     private double armPosY=ArmRef.posY;
@@ -54,7 +56,6 @@ public class NONAME2_Linear_1P extends LinearOpMode {
         //FtcDashboard dashboard = FtcDashboard.getInstance(); //Initializing Dashboard
         //  Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
-
         lfd  = hardwareMap.get(DcMotor.class, HardwareReference.LEFT_FRONT_DRIVE);
         rfd = hardwareMap.get(DcMotor.class, HardwareReference.RIGHT_FRONT_DRIVE);
         lbd  = hardwareMap.get(DcMotor.class, HardwareReference.LEFT_REAR_DRIVE);
@@ -66,13 +67,12 @@ public class NONAME2_Linear_1P extends LinearOpMode {
         spinner = hardwareMap.get(DcMotor.class, "spinner");
 
 
-
         lfd.setDirection(DcMotor.Direction.REVERSE);
         rfd.setDirection(DcMotor.Direction.FORWARD);
         lbd.setDirection(DcMotor.Direction.REVERSE);
-        rbd.setDirection(DcMotor.Direction.REVERSE);
+        rbd.setDirection(DcMotor.Direction.FORWARD);
         arm.setDirection(DcMotor.Direction.REVERSE);
-        drum.setDirection(DcMotor.Direction.FORWARD);
+        drum.setDirection(DcMotor.Direction.REVERSE);
         drum.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         spinner.setDirection(DcMotor.Direction.REVERSE);
         spinner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -89,23 +89,23 @@ public class NONAME2_Linear_1P extends LinearOpMode {
             // Setup a variable for each drive wheel
             double leftPower;
             double rightPower;
-            if (gamepad2.x&&!xlock&&!gamepad2.start) { //This locks/unlocks the arm. xlock is used to keep autoArm from being toggled every update.
+            /*if (gamepad2.x&&!xlock&&!gamepad2.start) { //This locks/unlocks the arm. xlock is used to keep autoArm from being toggled every update.
                 xlock=true;
                 autoArm=!autoArm;
             }
             if (!gamepad2.x&&!gamepad2.start) {
                 xlock=false;
-            }
-            if (gamepad1.a&&!gamepad1.start) { //If A is pressed, set the target arm position to the preset for A.
+            }*/
+            if (gamepad2.a&&!gamepad2.start) { //If A is pressed, set the target arm position to the preset for A.
                 targetArmPos = armPosA;
             }
-            if (gamepad1.b&&!gamepad1.start) { //If B is pressed, set the target arm position to the preset for B.
+            if (gamepad2.b&&!gamepad2.start) { //If B is pressed, set the target arm position to the preset for B.
                 targetArmPos = armPosB;
             }
-            if (gamepad1.x&&!gamepad1.start) { //If X is pressed, set the target arm position to the preset for X.
+            if (gamepad2.x&&!gamepad2.start) { //If X is pressed, set the target arm position to the preset for X.
                 targetArmPos = armPosX;
             }
-            if (gamepad1.y&&!gamepad1.start) { //If Y is pressed, set the target arm position to the preset for Y.
+            if (gamepad2.y&&!gamepad2.start) { //If Y is pressed, set the target arm position to the preset for Y.
                 targetArmPos = armPosY;
             }
             /*if (gamepad1.left_bumper&&gamepad1.right_bumper) { //If both bumpers are pressed, zero the arm positions again.
@@ -113,8 +113,8 @@ public class NONAME2_Linear_1P extends LinearOpMode {
                 arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             }*/
             double drumPower=0; //This makes the drum controlled by the triggers.
-            drumPower+=gamepad1.right_trigger;
-            drumPower-=gamepad1.left_trigger;
+            drumPower+=gamepad2.right_trigger;
+            drumPower-=gamepad2.left_trigger;
 
             if (autoArm) { //If autoArm is on, but the arm is set to 0 power, have the motor hold its position. If autoArm is not on, have the motor not hold its position so it can be manually readjusted.
                 arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -123,7 +123,6 @@ public class NONAME2_Linear_1P extends LinearOpMode {
             }
 
             //This runs the calculations for motor power based on stick position.
-
             double drive = -gamepad1.left_stick_y;
             //double drive = Math.max( gamepad1.left_stick_y, Math.max(gamepad1.right_stick_y, gamepad1.right_trigger - gamepad1.left_trigger));
             double turn = -( gamepad1.left_stick_x);  //Turning using the left stick.
@@ -139,7 +138,11 @@ public class NONAME2_Linear_1P extends LinearOpMode {
             double armPowAdjustMul=1.0;
 
             //This calculates the target power+direction that should be delivered to the arm motor. I'm currently in the process of writing a better version of the arm control code.
+            if (gamepad2.right_stick_button) {
+                armPowAdjustMul=2.0;
+            }
             double armPower=0;
+            targetArmPos+=gamepad2.right_stick_y; //Allows for fine control of arm position using the right stick.
             armPowAdjust=ArmRef.VelocityMode.armPowAdjust*armPowAdjustMul;
             double posDiff=targetArmPos-arm.getCurrentPosition();
             double targetArmVelocity=(Range.clip(posDiff/armVelocitySlope,-1.0,1.0)*armVelocityLimit);
@@ -148,7 +151,7 @@ public class NONAME2_Linear_1P extends LinearOpMode {
             thisPos=arm.getCurrentPosition();
             thisTime=runtime.milliseconds();
             double armAngRad=Math.cos(((arm.getCurrentPosition()-sidewaysPos)*Math.PI)/(sidewaysDist*2));
-            double  armGravComp=armAngRad*gravPow;
+            double armGravComp=armAngRad*gravPow;
             double timeChange=thisTime-pastTime;
             double posChange=thisPos-pastPos;
             double armVelocity=posChange/timeChange;
@@ -177,7 +180,10 @@ public class NONAME2_Linear_1P extends LinearOpMode {
                 spinnerPower=1;
             }
             spinner.setPower(Range.clip(spinnerPower, -1.0, 1.0));
-
+            if (gamepad2.right_bumper&&gamepad2.left_bumper) {
+                arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //This sets the arm's position to 0, to set the origin.
+                arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            }
             //Setting all the motors' powers based on earlier variables.
             lfd.setPower(Range.clip(leftPower+strafe, -1.0, 1.0));
             rfd.setPower(Range.clip(rightPower-strafe, -1.0, 1.0));

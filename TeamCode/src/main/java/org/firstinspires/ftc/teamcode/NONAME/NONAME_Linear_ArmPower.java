@@ -1,20 +1,23 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.NONAME;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.ArmRef;
+import org.firstinspires.ftc.teamcode.HardwareReference;
 
 //NOTREADY <- you may see comments like this in the code. These represent code that would cause errors now that needs a specific fix. For example, the spinner isn't defined on or attached to the robot, so I leave it off for now.
 @SuppressWarnings("FieldCanBeLocal")
-@TeleOp(name="NONAME Op Mode - Arm Encoder Control",group="Linear")
+@TeleOp(name="NONAME Op Mode - Arm Power Control",group="Linear")
 @Disabled
-public class NONAME_Linear_ArmUsesEncoders extends LinearOpMode {
+public class NONAME_Linear_ArmPower extends LinearOpMode {
     //Variable Initializations
     //Note: anything involving ArmRef.<something> is pulling variables from the ArmRef code. I put those variables there for ease of access, and also to allow FTCDashboard to access them.
     private ElapsedTime runtime = new ElapsedTime(); //Keeps track of the time during the code.
@@ -23,27 +26,18 @@ public class NONAME_Linear_ArmUsesEncoders extends LinearOpMode {
     private DcMotor drum = null; //Drum motor
     private DcMotor arm=null; //Arm motor
     //NOTREADY private DcMotor spinner=null; //Carousel spinner motor
-    private double pastTime = 0.0;
-    private int pastPos = 0;
-    private double pastVel=0;
-    private double thisTime= 0.0;
-    private int thisPos=0;
-    private double armPosA=ArmRef.posA; //Setting arm positions based on the ArmRef class (I set them there mostly for ease of access and also because that's where FTCDashboard can access them)
+    private double armPosA= ArmRef.posA; //Setting arm positions based on the ArmRef class (I set them there mostly for ease of access and also because that's where FTCDashboard can access them)
     private double armPosB=ArmRef.posB;
     private double armPosX=ArmRef.posX;
-    private double armPosY=ArmRef.posY;
+    private  double armPosY=ArmRef.posY;
     private boolean autoArm=true; //This is a debug variable, if it is false, then the arm motor shuts off, allowing for manual repositioning of the arm.
-    private double armPowerLimit = ArmRef.EncoderMode.armPowerLimit;
-    private double armPowerSlope = ArmRef.EncoderMode.armPowerSlope;
-    private double targVelInterp=0.0;
-    private double targPowerInterp=0.0;
+    private double armError=ArmRef.PowerMode.armError; //This is the acceptable error range within which the arm can be of the target position. It turned out to be not useful.
+    private double tgtArmPower=ArmRef.PowerMode.tgtArmPower; //This is the base power used in the power control equation.
     private double targetArmPos=0; //Target arm position, in encoder pulses.
     private double modulation = 0.7; //Multiplier for how much the motor power should be reduced.
     private boolean xlock=false; //This is a variable used to detect if X is being held, explained later.
-    public int zeroPos=ArmRef.GravMode.zeroPos;
-    public double gravPow=ArmRef.GravMode.gravPow;
-    public double sidewaysDist =ArmRef.GravMode.sidewaysDist;
-    public double sidewaysPos=zeroPos- sidewaysDist;
+    public static double armDistMultiplier=ArmRef.PowerMode.armDistMultiplier; //This is actually a divisor for arm power, explained later.
+    public static double armPowerLimit=ArmRef.PowerMode.armPowerLimit; //This limits the max arm power, which is good for preventing the arm from slamming into things or moving too quickly.
 
     @Override
     public void runOpMode() {
@@ -70,8 +64,7 @@ public class NONAME_Linear_ArmUsesEncoders extends LinearOpMode {
         //NOTREADY spinner.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //This sets the arm's position to 0, to set the origin.
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        pastTime=runtime.milliseconds();
-        pastPos=0;
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
@@ -93,12 +86,10 @@ public class NONAME_Linear_ArmUsesEncoders extends LinearOpMode {
             armPosB=ArmRef.posB;
             armPosX=ArmRef.posX;
             armPosY=ArmRef.posY;
-            armPowerLimit = ArmRef.EncoderMode.armPowerLimit;
-            armPowerSlope = ArmRef.EncoderMode.armPowerSlope;
-            zeroPos=ArmRef.GravMode.zeroPos;
-            gravPow=ArmRef.GravMode.gravPow;
-            sidewaysDist =ArmRef.GravMode.sidewaysDist;
-            sidewaysPos=zeroPos- sidewaysDist;
+            armError=ArmRef.PowerMode.armError;
+            tgtArmPower=ArmRef.PowerMode.tgtArmPower;
+            armDistMultiplier=ArmRef.PowerMode.armDistMultiplier;
+            armPowerLimit=ArmRef.PowerMode.armPowerLimit;
             if (gamepad1.a&&!gamepad1.start) { //If A is pressed, set the target arm position to the preset for A.
                 targetArmPos = armPosA;
             }
@@ -124,14 +115,6 @@ public class NONAME_Linear_ArmUsesEncoders extends LinearOpMode {
             } else {
                 arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             }
-            double armAngRad=Math.cos(((arm.getCurrentPosition()-sidewaysPos)*Math.PI)/(sidewaysDist*2));
-            double armGravComp=armAngRad*gravPow;
-            if ((targetArmPos<arm.getCurrentPosition())&&(arm.getCurrentPosition()<zeroPos)) {
-                armGravComp=-armGravComp;
-            }
-            if ((targetArmPos>arm.getCurrentPosition())&&(arm.getCurrentPosition()>zeroPos)) {
-                armGravComp=-armGravComp;
-            }
 
             //This runs the calculations for motor power based on stick position.
             double drive = -gamepad1.left_stick_y;
@@ -143,11 +126,16 @@ public class NONAME_Linear_ArmUsesEncoders extends LinearOpMode {
             if (targetArmPos<0) {
                 targetArmPos=0;
             }
-            double armDiff=Math.abs(targetArmPos-arm.getCurrentPosition());
-            arm.setTargetPosition((int)targetArmPos);
-            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            arm.setPower(Range.clip(armDiff/armPowerSlope,-1.0,1.0)*armPowerLimit+armGravComp);
 
+            //This calculates the target power+direction that should be delivered to the arm motor. I'm currently in the process of writing a better version of the arm control code.
+            double armPower;
+            targetArmPos+=gamepad1.right_stick_y; //Allows for fine control of arm position using the right stick.
+            armPower=((targetArmPos-arm.getCurrentPosition())/armDistMultiplier)*tgtArmPower;
+            if (autoArm) {
+                arm.setPower(Range.clip(armPower, -armPowerLimit, armPowerLimit));
+            } else {
+                arm.setPower(0);
+            }
             //Set the spinner to be controlled by the bumpers.
             /*NOTREADY double spinnerPower=0;
             if (gamepad1.left_bumper) {
@@ -165,9 +153,9 @@ public class NONAME_Linear_ArmUsesEncoders extends LinearOpMode {
 
             //Sending telemetry feedback back to Dashboard.
             int armPos=arm.getCurrentPosition();
-            dashboardTelemetry.addData("Arm Pos", arm.getCurrentPosition());
-            dashboardTelemetry.addData("Target Arm Pos", targetArmPos);
-            dashboardTelemetry.addData("Arm Gravity Compensation", armGravComp);
+            dashboardTelemetry.addData("Arm", "Position: "+armPos);
+            dashboardTelemetry.addData("Arm2", "Target Position: "+targetArmPos);
+            dashboardTelemetry.addData("Arm Power:",""+armPower);
             dashboardTelemetry.addData("AutoArm", "State: "+(autoArm?"True":"False"));
             dashboardTelemetry.update();
             //TODO: Make it possible to switch telemetry to the Driver Station App.
