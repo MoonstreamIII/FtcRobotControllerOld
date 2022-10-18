@@ -49,7 +49,7 @@ public class ExampleCode extends LinearOpMode {
         runtime.reset();
         //Run until stop is pressed
         while (opModeIsActive()) {
-            //Get motor target values
+            //Get motor target values and load them in.
             double leftPower;
             double rightPower;
             double drive = gamepad1.left_stick_y+ gamepad1.right_stick_y;
