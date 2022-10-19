@@ -53,9 +53,9 @@ public class Test_Motors extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        m1  = hardwareMap.get(DcMotor.class, MOTOR_1);
+        m1 = hardwareMap.get(DcMotor.class, MOTOR_1);
         m2 = hardwareMap.get(DcMotor.class, MOTOR_2);
-        m3  = hardwareMap.get(DcMotor.class, MOTOR_3);
+        m3 = hardwareMap.get(DcMotor.class, MOTOR_3);
         m4 = hardwareMap.get(DcMotor.class, MOTOR_4);
 
         motors = new DcMotor[]{m1,m2,m3,m4};
