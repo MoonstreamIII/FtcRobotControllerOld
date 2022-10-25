@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.config.Config;
 
 @Config
-public class ArmRef {
+public class ArmRef {  //Hi this is a comment yeah
     public static double posA=150;
     public static double posB=0;
     public static double posX=790;
