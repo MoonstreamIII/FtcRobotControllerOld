@@ -2,9 +2,9 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
 
-@Config
+//@config
 public class CustomAuto {
-    @Config
+    //@config
     public static class testAuto {
         public static String[] commands={"left","forward","posArm"};
         public static double[] values={1.0,0.5,520};

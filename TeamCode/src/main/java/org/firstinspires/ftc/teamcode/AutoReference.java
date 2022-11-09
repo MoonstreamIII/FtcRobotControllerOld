@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
-@Config
+//@config
 public class AutoReference {
     public static double leg1 = 7400;
     public static double leg2 = 4;
