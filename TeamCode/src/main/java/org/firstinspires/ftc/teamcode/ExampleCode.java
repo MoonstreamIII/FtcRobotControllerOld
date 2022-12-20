@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 //This is a system where the triggers control the speed of the bot. For example, if you have the left stick at full forward and the left trigger half pressed in, you get half power.
-@SuppressWarnings("FieldCanBeLocal")
+@SuppressWarnings("FieldCanBeLocal") //COMMENTHERE
 @TeleOp(name="ExampleCode",group="Linear")
 //@Disabled
 public class ExampleCode extends LinearOpMode {
