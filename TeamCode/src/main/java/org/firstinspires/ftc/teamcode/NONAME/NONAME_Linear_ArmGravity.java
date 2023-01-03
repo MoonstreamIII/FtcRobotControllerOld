@@ -216,7 +216,6 @@ public class NONAME_Linear_ArmGravity extends LinearOpMode {
             pastPos=thisPos;
             pastTime=thisTime;
             pastVel=velocity;
-            //TODO: Make it possible to switch telemetry to the Driver Station App.
         }
     }
 }

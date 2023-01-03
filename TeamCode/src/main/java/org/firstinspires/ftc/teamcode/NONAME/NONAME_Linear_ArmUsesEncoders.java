@@ -172,7 +172,6 @@ public class NONAME_Linear_ArmUsesEncoders extends LinearOpMode {
             dashboardTelemetry.addData("Arm Gravity Compensation", armGravComp);
             dashboardTelemetry.addData("AutoArm", "State: "+(autoArm?"True":"False"));
             dashboardTelemetry.update();
-            //TODO: Make it possible to switch telemetry to the Driver Station App.
         }
     }
 }

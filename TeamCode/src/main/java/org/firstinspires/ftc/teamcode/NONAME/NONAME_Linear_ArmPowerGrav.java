@@ -166,7 +166,6 @@ public class NONAME_Linear_ArmPowerGrav extends LinearOpMode {
             dashboardTelemetry.addData("Arm Power:",""+armPower);
             dashboardTelemetry.addData("AutoArm", "State: "+(autoArm?"True":"False"));
             dashboardTelemetry.update();
-            //TODO: Make it possible to switch telemetry to the Driver Station App.
         }
     }
 }
