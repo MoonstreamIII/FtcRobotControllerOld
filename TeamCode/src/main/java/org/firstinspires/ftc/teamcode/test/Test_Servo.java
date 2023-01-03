@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Disabled
 @SuppressWarnings("FieldCanBeLocal")
 @TeleOp(name="Test Servos",group="Test")
 //@Disabled
@@ -94,6 +93,7 @@ public class Test_Servo extends LinearOpMode {
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Servo", "pos (%.2f)", pos);
+            telemetry.addData("ActiveServo", ""+activeServo);
             telemetry.update();
         }
     }
