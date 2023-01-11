@@ -21,6 +21,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -41,7 +42,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
  * 100% accurate) method of detecting the skystone when lined up with
  * the sample regions over the first 3 stones.
  */
-@TeleOp
+@Autonomous(name="SkyStone", group="Linear Opmode")
 public class SkystoneDeterminationExample extends LinearOpMode
 {
     OpenCvInternalCamera phoneCam;
@@ -113,6 +114,7 @@ public class SkystoneDeterminationExample extends LinearOpMode
          */
         static final Scalar BLUE = new Scalar(0, 0, 255);
         static final Scalar GREEN = new Scalar(0, 255, 0);
+        static final Scalar RED = new Scalar(255, 0, 0);
 
         /*
          * The core values which define the location and size of the sample regions

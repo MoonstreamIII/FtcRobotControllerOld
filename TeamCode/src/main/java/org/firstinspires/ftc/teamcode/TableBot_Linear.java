@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -21,7 +22,7 @@ public class TableBot_Linear extends LinearOpMode {
     private DcMotor rfd = null;
     private DcMotor lbd = null;
     private DcMotor rbd = null;
-
+    private Servo s1 = null;
 
     @Override
     public void runOpMode() {
@@ -35,6 +36,7 @@ public class TableBot_Linear extends LinearOpMode {
         rfd = hardwareMap.get(DcMotor.class, HardwareReference.RIGHT_FRONT_DRIVE);
         lbd  = hardwareMap.get(DcMotor.class, HardwareReference.LEFT_REAR_DRIVE);
         rbd = hardwareMap.get(DcMotor.class, HardwareReference.RIGHT_REAR_DRIVE);
+        s1 = hardwareMap.get(Servo.class, "s1");
         //foo = hardwareMap.get(DcMotor.class, "foo_motor");
 
         // Most robots need the motor on one side to be reversed to drive forward
@@ -43,6 +45,7 @@ public class TableBot_Linear extends LinearOpMode {
         rfd.setDirection(DcMotor.Direction.FORWARD);
         lbd.setDirection(DcMotor.Direction.REVERSE);
         rbd.setDirection(DcMotor.Direction.FORWARD);
+        s1.setDirection(Servo.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -65,10 +68,11 @@ public class TableBot_Linear extends LinearOpMode {
             //NOTES: gamepad1.left_stick_y increases as stick goes down.
             double drive = -gamepad1.left_stick_y;
             //double drive = Math.max( gamepad1.left_stick_y, Math.max(gamepad1.right_stick_y, gamepad1.right_trigger - gamepad1.left_trigger));
-            double turn = -( gamepad1.left_stick_x);  //Turning using the left stick.
+            double turn = ( gamepad1.left_stick_x);  //Turning using the left stick.
             double strafe = (gamepad1.right_stick_x);  //Strafing using the right stick.
             leftPower    = drive - turn;
             rightPower   = drive + turn;
+            s1.setPosition(gamepad1.left_bumper?1:0);
 
 
             // Tank Mode uses one stick to control each wheel.
@@ -78,9 +82,9 @@ public class TableBot_Linear extends LinearOpMode {
 
             // Send calculated power to wheels
             lfd.setPower(Range.clip(leftPower+strafe, -1.0, 1.0));
-            rfd.setPower(Range.clip(rightPower-strafe, -1.0, 1.0));
+            rfd.setPower(Range.clip(-rightPower+strafe, -1.0, 1.0));
             lbd.setPower(Range.clip(leftPower-strafe, -1.0, 1.0));
-            rbd.setPower(Range.clip(rightPower+strafe, -1.0, 1.0));
+            rbd.setPower(Range.clip(-rightPower-strafe, -1.0, 1.0));
 
 
             // Show the elapsed game time and wheel power.
