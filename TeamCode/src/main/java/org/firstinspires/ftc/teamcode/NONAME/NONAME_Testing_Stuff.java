@@ -106,7 +106,6 @@ public class NONAME_Testing_Stuff extends LinearOpMode {
             dashboardTelemetry.addData("Arm Power",targetArmPower);
             dashboardTelemetry.addData("AutoArm", "State: "+(autoArm?"True":"False"));
             dashboardTelemetry.update();
-            //TODO: Make it possible to switch telemetry to the Driver Station App.
         }
     }
 }

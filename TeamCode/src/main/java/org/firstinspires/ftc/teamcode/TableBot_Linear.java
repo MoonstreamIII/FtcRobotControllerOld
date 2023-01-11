@@ -41,9 +41,9 @@ public class TableBot_Linear extends LinearOpMode {
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        lfd.setDirection(DcMotor.Direction.REVERSE);
+        lfd.setDirection(DcMotor.Direction.FORWARD);
         rfd.setDirection(DcMotor.Direction.FORWARD);
-        lbd.setDirection(DcMotor.Direction.REVERSE);
+        lbd.setDirection(DcMotor.Direction.FORWARD);
         rbd.setDirection(DcMotor.Direction.FORWARD);
         s1.setDirection(Servo.Direction.FORWARD);
 
@@ -59,6 +59,10 @@ public class TableBot_Linear extends LinearOpMode {
             double rightPower;
             double upTopPower;
             double upBottomPower;
+            double pos=0;
+            if(gamepad1.left_stick_button) {
+                pos=1;
+            }
 
             // Choose to drive using either Tank Mode, or POV Mode
             // Comment out the method that's not used.  The default below is POV.
@@ -66,12 +70,12 @@ public class TableBot_Linear extends LinearOpMode {
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight.
             //NOTES: gamepad1.left_stick_y increases as stick goes down.
-            double drive = -gamepad1.left_stick_y;
+            double drive = gamepad1.left_stick_y;
             //double drive = Math.max( gamepad1.left_stick_y, Math.max(gamepad1.right_stick_y, gamepad1.right_trigger - gamepad1.left_trigger));
             double turn = ( gamepad1.left_stick_x);  //Turning using the left stick.
             double strafe = (gamepad1.right_stick_x);  //Strafing using the right stick.
-            leftPower    = drive - turn;
-            rightPower   = drive + turn;
+            leftPower    = drive + turn;
+            rightPower   = drive - turn;
             s1.setPosition(gamepad1.left_bumper?1:0);
 
 
@@ -85,6 +89,7 @@ public class TableBot_Linear extends LinearOpMode {
             rfd.setPower(Range.clip(-rightPower+strafe, -1.0, 1.0));
             lbd.setPower(Range.clip(leftPower-strafe, -1.0, 1.0));
             rbd.setPower(Range.clip(-rightPower-strafe, -1.0, 1.0));
+            no.setPosition(pos);
 
 
             // Show the elapsed game time and wheel power.
