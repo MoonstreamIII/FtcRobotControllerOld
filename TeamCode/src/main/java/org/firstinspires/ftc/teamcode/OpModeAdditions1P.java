@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.util.Range;
 //@Disabled
 
 @TeleOp(name="OpMode(I hope)", group="Skybot")
-public class OpModeAdditions extends LinearOpMode {
+public class OpModeAdditions1P extends LinearOpMode {
     //front right
     private DcMotor motorFR = null;
     //back right
@@ -83,17 +83,18 @@ public class OpModeAdditions extends LinearOpMode {
             double liftSpeedR;
             if (gamepad1.left_bumper) { modulation=modLow; }
             if (gamepad1.right_bumper) { modulation=modHigh; }
-            if (gamepad2.x&&!grabtoggle) {
+            if (gamepad1.left_stick_button&&!grabtoggle) {
                 grabOn=!grabOn;
                 grabtoggle=true;
-            } else if (!gamepad2.x) {
+            } else if (!gamepad2.left_stick_button) {
                 grabtoggle=false;
             }
-            if (gamepad2.x) { liftPos=posX; }
-            if (gamepad2.y) { liftPos=posY; }
-            if (gamepad2.a) { liftPos=posA; }
-            if (gamepad2.b) { liftPos=posB; }
-            liftPos+=gamepad2.left_stick_y;
+            if (gamepad1.x) { liftPos=posX; }
+            if (gamepad1.y) { liftPos=posY; }
+            if (gamepad1.a) { liftPos=posA; }
+            if (gamepad1.b) { liftPos=posB; }
+            liftPos-=gamepad1.left_trigger;
+            liftPos+=gamepad1.right_trigger;
             liftL.setTargetPosition(liftPos);
             liftR.setTargetPosition(liftPos);
             grabber.setPosition(grabOn? grabPos : relPos);
