@@ -27,7 +27,7 @@ public class OpModeAdditions extends LinearOpMode {
     private DcMotor liftL = null;
     private DcMotor liftR = null;
     private double relPos = 0;
-    private double grabPos = 1.0;
+    private double grabPos = 0.25;
     private double pos = 0;
     //potentially reduce power, not written yet
     private double modulation = 1;
@@ -36,6 +36,7 @@ public class OpModeAdditions extends LinearOpMode {
     private boolean grabtoggle=false;
     private boolean grabOn=false;
     private double maxLiftSpeed=0.5;
+    private boolean velMode=false;
     private int posX = 0;
     private int posY = 0;
     private int posA = 0;
@@ -83,19 +84,28 @@ public class OpModeAdditions extends LinearOpMode {
             double liftSpeedR;
             if (gamepad1.left_bumper) { modulation=modLow; }
             if (gamepad1.right_bumper) { modulation=modHigh; }
-            if (gamepad2.x&&!grabtoggle) {
-                grabOn=!grabOn;
-                grabtoggle=true;
-            } else if (!gamepad2.x) {
-                grabtoggle=false;
-            }
+            if (gamepad2.left_bumper) {grabOn=false;}
+            if (gamepad2.right_bumper) {grabOn=true;}
             if (gamepad2.x) { liftPos=posX; }
             if (gamepad2.y) { liftPos=posY; }
             if (gamepad2.a) { liftPos=posA; }
             if (gamepad2.b) { liftPos=posB; }
-            liftPos+=gamepad2.left_stick_y;
-            liftL.setTargetPosition(liftPos);
-            liftR.setTargetPosition(liftPos);
+            if (gamepad1.left_trigger>0||gamepad1.right_trigger>0) {
+                if (!velMode) {
+                    velMode = true;
+                    liftL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    liftR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                }
+            } else if (velMode) {
+                liftPos=liftL.getCurrentPosition();
+                velMode = false;
+                liftL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                liftR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            }
+            if (!velMode) {
+                liftL.setTargetPosition(liftPos);
+                liftR.setTargetPosition(liftPos);
+            }
             grabber.setPosition(grabOn? grabPos : relPos);
             double leftPower;
             double rightPower;
@@ -105,15 +115,20 @@ public class OpModeAdditions extends LinearOpMode {
             double strafe = (gamepad1.right_stick_x);  //Strafing using the right stick
             leftPower    = (drive - turn);
             rightPower   = (drive + turn);
-            if (Math.abs(liftPos-liftL.getCurrentPosition())<liftSlowRange) {
-                liftSpeedL=liftSlowSpeed+(maxLiftSpeed-liftSlowSpeed)*(liftPos-liftL.getCurrentPosition());
+            if (velMode) {
+                liftSpeedL=gamepad1.right_trigger-gamepad1.left_trigger;
+                liftSpeedR=gamepad1.right_trigger-gamepad1.left_trigger;
             } else {
-                liftSpeedL=maxLiftSpeed;
-            }
-            if (Math.abs(liftPos-liftR.getCurrentPosition())<liftSlowRange) {
-                liftSpeedR=liftSlowSpeed+(maxLiftSpeed-liftSlowSpeed)*(liftPos-liftR.getCurrentPosition());
-            } else {
-                liftSpeedR=maxLiftSpeed;
+                if (Math.abs(liftPos - liftL.getCurrentPosition()) < liftSlowRange) {
+                    liftSpeedL = liftSlowSpeed + (maxLiftSpeed - liftSlowSpeed) * (liftPos - liftL.getCurrentPosition());
+                } else {
+                    liftSpeedL = maxLiftSpeed;
+                }
+                if (Math.abs(liftPos - liftR.getCurrentPosition()) < liftSlowRange) {
+                    liftSpeedR = liftSlowSpeed + (maxLiftSpeed - liftSlowSpeed) * (liftPos - liftR.getCurrentPosition());
+                } else {
+                    liftSpeedR = maxLiftSpeed;
+                }
             }
             motorFL.setPower(Range.clip((leftPower+strafe)*modulation, -1.0, 1.0));
             motorFR.setPower(Range.clip((rightPower-strafe)*modulation, -1.0, 1.0));

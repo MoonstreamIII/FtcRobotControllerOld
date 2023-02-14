@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -7,8 +8,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 //NOTREADY <- you may see comments like this in the code. These represent code that would cause errors now that needs a specific fix. For example, the spinner isn't defined on or attached to the robot, so I leave it off for now.
 @SuppressWarnings("FieldCanBeLocal")
-@Autonomous(name="Auto Turn Left",group="Linear")
-//@Disabled
+@Autonomous(name="Auto New",group="Linear")
+@Disabled
 public class AutoNew extends LinearOpMode {
     //Variable Initializations
     //Note: anything involving ArmRef.<something> is pulling variables from the ArmRef code. I put those variables there for ease of access, and also to allow FTCDashboard to access them.

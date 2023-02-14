@@ -89,7 +89,7 @@ public class TableBot_Linear extends LinearOpMode {
             rfd.setPower(Range.clip(-rightPower+strafe, -1.0, 1.0));
             lbd.setPower(Range.clip(leftPower-strafe, -1.0, 1.0));
             rbd.setPower(Range.clip(-rightPower-strafe, -1.0, 1.0));
-            no.setPosition(pos);
+
 
 
             // Show the elapsed game time and wheel power.
