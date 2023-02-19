@@ -37,10 +37,11 @@ public class OpModeAdditions1P extends LinearOpMode {
     private boolean grabToggle =false;
     private boolean grabOn=false;
     private double maxLiftSpeed=0.5;
-    private int posX = 0;
-    private int posY = 0;
-    private int posA = 0;
-    private int posB = 0;
+    private int posX = 1110;//680=lowest  1108=middle 1660=top
+    private int posY = 1660;
+    private int posA = 150;
+    private int posB = 680;
+    private int posStart = 0;
     private int liftJoyMul=10;
     private int liftSlowRange=10;
     private double liftSlowSpeed=0.1;
@@ -64,9 +65,9 @@ public class OpModeAdditions1P extends LinearOpMode {
         motorBL.setDirection(DcMotor.Direction.FORWARD);
 
         liftL = hardwareMap.get(DcMotor.class, "liftL");
-        liftL.setDirection(DcMotor.Direction.REVERSE);
+        liftL.setDirection(DcMotor.Direction.FORWARD);
         liftR = hardwareMap.get(DcMotor.class, "liftR");
-        liftR.setDirection(DcMotor.Direction.FORWARD);
+        liftR.setDirection(DcMotor.Direction.REVERSE);
         grabber = hardwareMap.get(Servo.class, "grabber");
 
         motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -90,6 +91,7 @@ public class OpModeAdditions1P extends LinearOpMode {
             if (gamepad1.y) { liftPos=posY; }
             if (gamepad1.a) { liftPos=posA; }
             if (gamepad1.b) { liftPos=posB; }
+            if (gamepad1.start) { liftPos=posStart; }
             if (gamepad1.left_trigger>0||gamepad1.right_trigger>0) {
                 if (!velMode) {
                     velMode = true;

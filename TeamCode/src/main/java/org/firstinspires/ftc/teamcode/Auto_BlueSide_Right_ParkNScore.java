@@ -8,9 +8,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 //NOTREADY <- you may see comments like this in the code. These represent code that would cause errors now that needs a specific fix. For example, the spinner isn't defined on or attached to the robot, so I leave it off for now.
 @SuppressWarnings("FieldCanBeLocal")
-@Autonomous(name="Auto New",group="Linear")
-//@Disabled
-public class AutoNew extends LinearOpMode {
+@Autonomous(name="Auto Blue Side Right Score",group="Linear")
+@Disabled
+public class Auto_BlueSide_Right_ParkNScore extends LinearOpMode {
     //Variable Initializations
     //Note: anything involving ArmRef.<something> is pulling variables from the ArmRef code. I put those variables there for ease of access, and also to allow FTCDashboard to access them.
     private ElapsedTime runtime = new ElapsedTime(); //Keeps track of the time during the code.
@@ -24,12 +24,12 @@ public class AutoNew extends LinearOpMode {
     private Servo grabber = null;
     private double grabPos = 0.0;
     private double relPos = 0.0;
-    private String[] commands = {"wait","lift","wait","forward","wait","strafeR","forward","lift"};
-    private double[] values = {0,0.01,0,0.7,0,0.7,0.7,0.5};
-    private double[] times = {100,0,1000,0,1000,0,0,0};
-    private int[] encodes = {0,1660,0,100,0,5000,5000,0};
+    private String[] commands = {"wait","strafeL","lift","forward","release","backward","strafeR","lift"};
+    private double[] values = {0,0.7};
+    private double[] times = {100,0};
+    private int[] encodes = {0,5000};
     private int instNum=0;
-    private int numcommands = 8;
+    private int numcommands = 6;
     private String inst;
     public int zeroPos=ArmRef.GravMode.zeroPos;
     public double gravPow=ArmRef.GravMode.gravPow;
@@ -174,8 +174,8 @@ public class AutoNew extends LinearOpMode {
         rfd.setDirection(DcMotor.Direction.FORWARD);
         lbd.setDirection(DcMotor.Direction.REVERSE); //Setting motor rotation directions and initializing them.
         rbd.setDirection(DcMotor.Direction.FORWARD);
-        liftL.setDirection(DcMotor.Direction.FORWARD); //Setting motor rotation directions and initializing them.
-        liftR.setDirection(DcMotor.Direction.REVERSE);
+        liftL.setDirection(DcMotor.Direction.REVERSE); //Setting motor rotation directions and initializing them.
+        liftR.setDirection(DcMotor.Direction.FORWARD);
         lfd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rfd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rbd.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -209,10 +209,9 @@ public class AutoNew extends LinearOpMode {
                 }
             } else {
                 boolean motorsBusy = lfd.isBusy()||rfd.isBusy()||lbd.isBusy()||rbd.isBusy()||liftL.isBusy()||liftR.isBusy();
-                if (!motorsBusy) {
+                if (motorsBusy) {
                     instNum++;
                     if (instNum>=numcommands) {
-
                         return;
                     }
                     instTimer.reset();
