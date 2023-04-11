@@ -31,10 +31,6 @@ public class AutoNew extends LinearOpMode {
     private int instNum=0;
     private int numcommands = 8;
     private String inst;
-    public int zeroPos=ArmRef.GravMode.zeroPos;
-    public double gravPow=ArmRef.GravMode.gravPow;
-    public double sidewaysDist =ArmRef.GravMode.sidewaysDist;
-    public double sidewaysPos=zeroPos- sidewaysDist;
     private double targetArmPos=0; //Target arm position, in encoder pulses.
 
 

@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.Range;
  * Test the dashboard gamepad integration.
  */
 //@Disabled
-
+//Add comments starting with "//HELP:" (to make them show up for me) if you have questions
 @TeleOp(name="OpMode(I hope)", group="Skybot")
     public class OpModeAdditions extends LinearOpMode {
         //front right
@@ -83,32 +83,37 @@ import com.qualcomm.robotcore.util.Range;
             while(opModeIsActive()){
                 double liftSpeedL;
                 double liftSpeedR;
+                //Change motor speed multiplier
                 if (gamepad1.left_bumper) { modulation=modLow; }
                 if (gamepad1.right_bumper) { modulation=modHigh; }
+                //Listen for open/close grabber inputs
                 if (gamepad2.left_bumper) {grabOn=false;}
                 if (gamepad2.right_bumper) {grabOn=true;}
+                //Preset lift positions
                 if (gamepad2.x) { liftPos=posX; }
                 if (gamepad2.y) { liftPos=posY; }
                 if (gamepad2.a) { liftPos=posA; }
                 if (gamepad2.b) { liftPos=posB; }
                 if (gamepad2.start) { liftPos=posStart; }
+                //If the right stick is being used, motors switch to moving with a velocity based on right stick
                 if (Math.abs(gamepad2.right_stick_y)>0.01) {
+                    //Enable velocity mode
                     if (!velMode) {
                         velMode = true;
                         liftL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                         liftR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     }
-                } else if (velMode) {
+                } else if (velMode) { //Disable velocity mode, lock motors to current position (only runs once each time the stick 0s out)
                     liftPos=liftL.getCurrentPosition();
                     velMode = false;
                     liftL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     liftR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 }
-                if (!velMode) {
+                if (!velMode) { //If velocity mode is off, have the motors just look at the saved position
                     liftL.setTargetPosition(liftPos);
                     liftR.setTargetPosition(liftPos);
                 }
-                grabber.setPosition(grabOn? grabPos : relPos);
+                grabber.setPosition(grabOn? grabPos : relPos); //Set grabber position
                 double leftPower;
                 double rightPower;
                 double drive = gamepad1.left_stick_y+ gamepad1.right_stick_y;
@@ -117,10 +122,10 @@ import com.qualcomm.robotcore.util.Range;
                 double strafe = -(gamepad1.right_stick_x);  //Strafing using the right stick
                 leftPower    = (drive - turn);
                 rightPower   = (drive + turn);
-                if (velMode) {
+                if (velMode) { //If velocity mode is on, the lifts just move based on the stick position.
                     liftSpeedL=-gamepad2.right_stick_y;
                     liftSpeedR=-gamepad2.right_stick_y;
-                } else {
+                } else { //Set motor speed, automatically reduces motor speed as the motor approaches the target position.
                     if (Math.abs(liftPos - liftL.getCurrentPosition()) < liftSlowRange) {
                         liftSpeedL = liftSlowSpeed + (maxLiftSpeed - liftSlowSpeed) * (liftPos - liftL.getCurrentPosition());
                     } else {
